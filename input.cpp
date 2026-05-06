@@ -8,8 +8,15 @@
 
 constexpr char DEV_INPUT_EVENT[11] = "/dev/input";
 
-Input::Input() {
+struct input_event {
+    struct timeval time;
+    unsigned short type;
+    unsigned short code;
+    int value;
+};
 
+Input::Input() {
+    
     
 
 }

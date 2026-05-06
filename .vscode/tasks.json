@@ -9,8 +9,7 @@
                 "-g",
                 "${file}",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}",
-                "-I/usr/include/libevdev-1.0",
+                "${fileDirname}/output/${fileBasenameNoExtension}",
             ],
             "options": {
                 "cwd": "${fileDirname}"
