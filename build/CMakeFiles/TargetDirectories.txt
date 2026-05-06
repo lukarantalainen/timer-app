@@ -1,0 +1,3 @@
+/home/lukar/Projects/timer-app/build/CMakeFiles/TimerApp.dir
+/home/lukar/Projects/timer-app/build/CMakeFiles/edit_cache.dir
+/home/lukar/Projects/timer-app/build/CMakeFiles/rebuild_cache.dir
