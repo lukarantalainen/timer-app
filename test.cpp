@@ -31,18 +31,17 @@ int main(int argc, char* argv[])
         strcat(path, "0");
     }
     
-
     struct pollfd fds[1];
     
     fds[0].fd = open(path, O_RDONLY | O_NOCTTY | O_NONBLOCK);
 
     if (fds[0].fd < 0) {
         perror("failed to open device");
-        return (-1);
+        //return (-1);
     }
 
-    const int input_size = 4096;
-    unsigned char input_data[input_size];
+    const int input_size = sizeof(input_event);
+    struct input_event* input_data = new input_event;
     memset(input_data,0,input_size);
 
     fds[0].events = POLLIN;
@@ -67,11 +66,8 @@ int main(int argc, char* argv[])
             printf("failed");
             break;
         } else {
-            printf("total read: %d/%d", r, input_size);
-            for (int i=0; i<r; ++i) {
-                printf("%02X ", (unsigned char)input_data[i]);
-            }
-            printf("\n");
+            printf("time: %lu type: %hu code: %hu value: %d\n", input_data->time.tv_sec, input_data->type, input_data->code, input_data->value);
+            memset(input_data,0,input_size);
         }
     }
     
