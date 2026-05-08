@@ -6,23 +6,45 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <iostream>
+#include <fstream>
+#include <csignal>
+
 #include <linux/kernel.h>
 #include <linux/input-event-codes.h>
 #include <linux/input.h>
 
+#include <map>
+#include <string>
+#include <vector>
+#include <algorithm>
+
+extern "C" {
+	#include "names.h"
+}
+
+//#include "names.h"
+#define NAME_ELEMENT(element) [element] = #element
+
+int stop{};
 
 
 constexpr char DEV_PATH[] = "/dev/input/event";
 
-// struct input_event {
-//     struct timeval time;
-//     unsigned short type;
-//     unsigned short code;
-//     int value;
-// };
+std::map<std::string, int> keys = {};
+
+void interrupt_handler(int sig) {
+	printf("SIGINT");
+	stop = true;
+	
+}
+
 
 int main(int argc, char* argv[])
-{    
+{   
+	
+	std::signal(SIGINT, interrupt_handler);
+
     const int timeout = -1;
     char* input_dev = argv[1];
 
@@ -35,11 +57,11 @@ int main(int argc, char* argv[])
         strcat(path, "0");
     }
     
-    struct pollfd fds[1];
+    struct pollfd fd;
     
-    fds[0].fd = open(path, O_RDONLY | O_NOCTTY | O_NONBLOCK);
+    fd.fd = open(path, O_RDONLY | O_NOCTTY | O_NONBLOCK);
 
-    if (fds[0].fd < 0) {
+    if (fd.fd < 0) {
         
         perror("failed to open device");
         return (-1);
@@ -47,40 +69,59 @@ int main(int argc, char* argv[])
 
     const int input_size = sizeof(input_event);
     struct input_event* input_data = new input_event;
-    memset(input_data,0,input_size);
+    memset(input_data,0,input_size);	
 
-    fds[0].events = POLLIN;
+    fd.events = POLLIN;
     
     int ret;
 
     while(true) {
-        ret = poll(fds, 1, timeout);
+		if (stop==1) break;
+        ret = poll(&fd, 1, timeout);
         
         if (ret < 0) {
-            printf("Failed poll");
+            printf("Failed poll\n");
             break;
         }
 
-        if (!fds[0].revents) {
+        if (!fd.revents) {
             continue;
         }
-        
-        ssize_t r = read(fds[0].fd, input_data, input_size);
-        
 
-        if (r < input_size) {
-            printf("failed");
+        ssize_t rd = read(fd.fd, input_data, input_size);
+        
+        uint type, code;
+
+        type = input_data->type;
+        code = input_data->code;
+
+		if (type!=1) continue;
+
+        if (rd < input_size) {
+            printf("failed\n");
             return -1;
         } else {
-            printf("time: %lu type: %hu code: %hu value: %d\n", input_data->time.tv_sec, input_data->type, input_data->code, input_data->value);
+			std::string key{codename(type, code)};
+			const char* name = codename(type, code);
+            printf("%s\n", codename(type, code));
+			if (keys.count(key)) {
+				++keys[key];
+			} else  {
+				keys[key] = 1;
+			}
+            printf("time: %lu type: %hu code: %hu (%s) value: %d\n", input_data->time.tv_sec, type, code, name, input_data->value);
             memset(input_data,0,input_size);
         }
     }
-    
-    close(fds[0].fd);
+
+	for (auto k : keys) {
+		std::cout << k.first << ": " << k.second << "\n";
+	}
+
+	
+	close(fd.fd);
+    delete input_data;
     
     return 0;
 
 }
-
-
