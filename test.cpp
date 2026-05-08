@@ -7,18 +7,24 @@
 #include <stdlib.h>
 
 #include <linux/kernel.h>
+#include <linux/input-event-codes.h>
+#include <linux/input.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 constexpr char DEV_PATH[] = "/dev/input/event";
 
-struct input_event {
-    struct timeval time;
-    unsigned short type;
-    unsigned short code;
-    int value;
-};
+// struct input_event {
+//     struct timeval time;
+//     unsigned short type;
+//     unsigned short code;
+//     int value;
+// };
 
 int main(int argc, char* argv[])
-{
+{    
     const int timeout = -1;
     char* input_dev = argv[1];
 
@@ -36,8 +42,9 @@ int main(int argc, char* argv[])
     fds[0].fd = open(path, O_RDONLY | O_NOCTTY | O_NONBLOCK);
 
     if (fds[0].fd < 0) {
+        
         perror("failed to open device");
-        //return (-1);
+        return (-1);
     }
 
     const int input_size = sizeof(input_event);
@@ -61,10 +68,11 @@ int main(int argc, char* argv[])
         }
         
         ssize_t r = read(fds[0].fd, input_data, input_size);
+        
 
-        if (r < 0) {
+        if (r < input_size) {
             printf("failed");
-            break;
+            return -1;
         } else {
             printf("time: %lu type: %hu code: %hu value: %d\n", input_data->time.tv_sec, input_data->type, input_data->code, input_data->value);
             memset(input_data,0,input_size);
@@ -76,3 +84,7 @@ int main(int argc, char* argv[])
     return 0;
 
 }
+
+#ifdef __cplusplus
+} // extern "C";
+#endif
