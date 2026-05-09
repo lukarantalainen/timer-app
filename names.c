@@ -342,7 +342,7 @@ static const char * const keys[KEY_MAX + 1] = {
 #ifdef KEY_SCREENSAVER
 	NAME_ELEMENT(KEY_SCREENSAVER),
 #endif
-#ifdef KEY_VOICECOMMAND
+#ifdef KEY_VOICECOMMANDif
 	NAME_ELEMENT(KEY_VOICECOMMAND),
 #endif
 #ifdef KEY_BRIGHTNESS_MIN
