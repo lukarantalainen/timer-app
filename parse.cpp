@@ -27,8 +27,6 @@ int main() {
     std::ifstream input(header_path);
 
     std::string line;
-
-    std::ofstream out("parse.txt");
     
     std::regex rgx("(?:#define )([^\\s]+)");
 
@@ -58,15 +56,14 @@ int main() {
             std::smatch match = *i;
             std::string match_str = match[1];
             //std::cout << match_str << "\n";
-            out << match_str << "\n";
             
             if (std::string(match_str.begin(), match_str.begin()+3) == "SYN") {
-                SYN.push_back(match_str);
+                syn.push_back(match_str);
             }
         }
     }
 
-    for (auto s : SYN) {
+    for (auto s : syn) {
         std::cout << s << "\n";
     }
     
