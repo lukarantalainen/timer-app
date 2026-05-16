@@ -19,31 +19,38 @@
 #include <vector>
 #include <algorithm>
 
-extern "C" {
-	#include "names.h"
-}
-
-//#include "names.h"
-#define NAME_ELEMENT(element) [element] = #element
+#include "table.h"
 
 int stop{};
-
 
 constexpr char DEV_PATH[] = "/dev/input/event";
 
 std::map<std::string, int> keys = {};
 
 void interrupt_handler(int sig) {
-	printf("SIGINT");
+    switch(sig) {
+        case 0: std::cout << "SIGTERM" << "\n";
+        break;
+        case 1: std::cout << "SIGSEGV" << "\n";
+        break;
+        case 2: std::cout << "\nSIGINT" << "\n";
+        break;
+        default: std::cout << "unknown signal: " << sig << "\n";
+    }
+    
+    std::cout << signal << "\n";
 	stop = true;
-	
 }
 
+const char* codename(unsigned int type, unsigned int code)
+{
+	return (type <= EV_MAX) ? types[type][code] : "?";
+}
 
 int main(int argc, char* argv[])
 {   
-	
 	std::signal(SIGINT, interrupt_handler);
+    std::signal(SIGKILL, interrupt_handler);
 
     const int timeout = -1;
     char* input_dev = argv[1];
@@ -102,14 +109,14 @@ int main(int argc, char* argv[])
             return -1;
         } else {
 			std::string key{codename(type, code)};
-			const char* name = codename(type, code);
+			const char* n = codename(type, code);
             printf("%s\n", codename(type, code));
 			if (keys.count(key)) {
 				++keys[key];
 			} else  {
 				keys[key] = 1;
 			}
-            printf("time: %lu type: %hu code: %hu (%s) value: %d\n", input_data->time.tv_sec, type, code, name, input_data->value);
+            printf("time: %lu type: %hu code: %hu (%s) value: %d\n", input_data->time.tv_sec, type, code, n, input_data->value);
             memset(input_data,0,input_size);
         }
     }

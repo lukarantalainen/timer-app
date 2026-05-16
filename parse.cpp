@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <iterator>
+#include <set>
 
 #include <linux/input-event-codes.h>
 
@@ -30,20 +31,29 @@ int main() {
     
     std::regex rgx("(?:#define )([^\\s]+)");
 
-    std::vector<std::string> syn{};
-    std::array<const char*, KEY_CNT> key{};
-    std::array<const char*, REL_CNT> rel{};
-    std::array<const char*, ABS_CNT> abs{};
-    std::array<const char*, MSC_CNT> msc{};
-    std::array<const char*, SW_CNT> sw{};
-    std::array<const char*, LED_CNT> led{};
-    std::array<const char*, SND_CNT> snd{};
-    std::array<const char*, REP_CNT> rep{};
-    std::array<const char*, 0> ff{};
-    std::array<const char*, 0> pwr{};
-    std::array<const char*, 0> rel{};
+    // enum evtype {
+    //     syn,
+    //     key,
+    //     rel,
+    //     abs,
+    //     msc,
+    //     sw,
+    //     led,
+    //     snd,
+    //     rep,
+    //     ff,
+    //     pwr,
+    //     rel,
+    // };
 
+    std::ofstream output("table.h");
+    output << "#include <array>\n";
+    output << "#include <linux/input-event-codes.h>\n\n";
 
+    bool start;
+    std::string previous;
+
+    std::set<std::string> seen;
 
     while (std::getline(input, line)) {
         auto words_begin = 
@@ -56,17 +66,65 @@ int main() {
             std::smatch match = *i;
             std::string match_str = match[1];
             //std::cout << match_str << "\n";
-            
-            if (std::string(match_str.begin(), match_str.begin()+3) == "SYN") {
-                syn.push_back(match_str);
+
+            std::string current;
+
+            for (int i{}; i<match_str.length(); ++i) {
+                if (match_str[i] == '_') {
+                    current = match_str.substr(0, i);
+                    break;
+                }
             }
+
+            if (current!=previous) {
+                if (current == "SYN") {
+                    output << "std::array<const char*, SYN_CNT> type_syn{\n";
+                    start = true;
+                } else if (current == "KEY" && !seen.count("KEY")) {
+                    output << "};\n\nstd::array<const char*, KEY_CNT> type_key{\n";
+                    seen.insert("KEY");
+                } else if (current == "REL" && !seen.count("REL")) {
+                    output << "};\n\nstd::array<const char*, REL_CNT> type_rel{\n";
+                    seen.insert("REL");
+                } else if (current == "ABS" && !seen.count("ABS")) {
+                    output << "};\n\nstd::array<const char*, ABS_CNT> type_abs{\n";
+                    seen.insert("ABS");
+                } else if (current == "MSC" && !seen.count("MSC")) {
+                    output << "};\n\nstd::array<const char*, MSC_CNT> type_msc{\n";
+                    seen.insert("MSC");
+                } else if (current == "SW" && !seen.count("SW")) {
+                    output << "};\n\nstd::array<const char*, 25> type_sw{\n";
+                    seen.insert("SW");
+                } else if (current == "LED" && !seen.count("LED")) {
+                    output << "};\n\nstd::array<const char*, LED_CNT> type_led{\n";
+                    seen.insert("LED");
+                } else if (current == "SND" && !seen.count("SND")) {
+                    output << "};\n\nstd::array<const char*, SND_CNT> type_snd{\n";
+                    seen.insert("SND");
+                } else if (current == "REP" && !seen.count("REP")) {
+                    output << "};\n\nstd::array<const char*, 5> type_rep{\n";
+                    seen.insert("REP");
+                }
+            }
+
+            if (start) output << "    \"" << match_str << "\", \n";
+            previous = current;
         }
     }
+    output << "};\n";
 
-    for (auto s : syn) {
-        std::cout << s << "\n";
-    }
+    output << "std::array<const char**, EV_MAX> types {\n";
+    output << "    type_syn.data(),\n";
+    output << "    type_key.data(),\n";
+    output << "    type_rel.data(),\n";
+    output << "    type_abs.data(),\n";
+    output << "    type_msc.data(),\n";
+    output << "    type_sw.data(),\n";
+    output << "    type_led.data(),\n";
+    output << "    type_snd.data(),\n";
+    output << "    type_rep.data(),\n";
     
+    output << "};\n";
 
 
     return 0;
