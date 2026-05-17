@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/TimerApp.dir/link.d CMakeFiles/TimerApp.dir/main.cpp.o CMakeFiles/TimerApp.dir/timer.cpp.o -o TimerApp

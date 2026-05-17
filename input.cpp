@@ -28,17 +28,6 @@ constexpr char DEV_PATH[] = "/dev/input/event";
 std::map<std::string, int> keys = {};
 
 void interrupt_handler(int sig) {
-    switch(sig) {
-        case 0: std::cout << "SIGTERM" << "\n";
-        break;
-        case 1: std::cout << "SIGSEGV" << "\n";
-        break;
-        case 2: std::cout << "\nSIGINT" << "\n";
-        break;
-        default: std::cout << "unknown signal: " << sig << "\n";
-    }
-    
-    std::cout << signal << "\n";
 	stop = true;
 }
 
@@ -52,7 +41,7 @@ int main(int argc, char* argv[])
 	std::signal(SIGINT, interrupt_handler);
     std::signal(SIGKILL, interrupt_handler);
 
-    const int timeout = -1;
+    const int timeout = 5;
     char* input_dev = argv[1];
 
     char* path = new(char[strlen(DEV_PATH)+1+1]);

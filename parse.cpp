@@ -18,6 +18,7 @@ std::string starts_with(std::string s) {
             return std::string(s.begin(), s.begin()+i);
         }
     }
+    
     return "?";
 }
 
@@ -125,7 +126,6 @@ int main() {
     output << "    type_rep.data(),\n";
     
     output << "};\n";
-
 
     return 0;
 }
