@@ -2,15 +2,17 @@ cmake_minimum_required(VERSION 4.0)
 
 project(TimerApp)
 
-add_executable(TimerApp)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-target_sources(TimerApp
-  PRIVATE
-    main.cpp
-    timer.cpp
-  
-  PUBLIC
-    FILE_SET HEADERS
-    FILES
-      timer.h
+
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
+qt_standard_project_setup()
+
+add_executable(TimerApp
+  main.cpp
+  mainwindow.cpp
+  timer.cpp
 )
+
+target_link_libraries(TimerApp PRIVATE Qt6::Widgets)

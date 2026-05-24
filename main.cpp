@@ -1,8 +1,22 @@
 #include <iostream>
 #include "timer.h"
 
-int main() {
-    Timer timer;
+#include <QApplication>
+#include <QWidget>
+#include "mainwindow.h"
+#include <QMainWindow>
+#include <QMenuBar>
+#include <QRadioButton>
 
-    return 0;
+
+
+int main(int argc, char *argv[])
+{
+    QApplication app(argc, argv);
+
+    MainWindow mainwindow;
+    mainwindow.show();
+
+    return app.exec();
 }
+    
