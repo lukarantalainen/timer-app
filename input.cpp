@@ -42,7 +42,13 @@ int main(int argc, char* argv[])
     std::signal(SIGKILL, interrupt_handler);
 
     const int timeout = 5;
-    char* input_dev = argv[1];
+    char* input_dev;
+    if (argc > 1) {
+        input_dev = argv[1];
+    } else {
+        std::cout << "Please input a device number" << "\n";
+        return 0;
+    }
 
     char* path = new(char[strlen(DEV_PATH)+1+1]);
 

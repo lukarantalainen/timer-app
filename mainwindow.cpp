@@ -8,19 +8,19 @@
 #include <QMainWindow>
 #include <QPalette>
 #include <QWidget>
+#include <QLabel>
+#include <QElapsedTimer>
+#include <QTimer>
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
   resize(500, 500);
   setWindowTitle("Timer app");
-
+  
   QIcon window_icon{"image.png"};
   setWindowIcon(window_icon);
 
   auto central_widget{centralWidget(this)};
   setCentralWidget(central_widget);
-
-  auto menubar{menuBar(this)};
-  setMenuBar(menubar);
 }
 
 QMenuBar* MainWindow::menuBar(MainWindow* parent) {
@@ -28,32 +28,47 @@ QMenuBar* MainWindow::menuBar(MainWindow* parent) {
   QMenu* filemenu = new QMenu(menubar);
   filemenu->setTitle("File");
 
-  QAction* open_file = new QAction("&Open File");
-  open_file->setShortcut(QKeySequence::Open);
-  open_file->setStatusTip("Open an existing file");
-  connect(open_file, &QAction::triggered, parent, &MainWindow::open);
-
-  filemenu->addAction(open_file);
-
   menubar->addMenu(filemenu);
   menubar->show();
   return menubar;
 }
 
-void MainWindow::open() {
-  QFileDialog::getOpenFileName(
-      this, tr("Open Document"), QDir::currentPath(),
-      tr("Document files (*.doc *.rtf);;All files (*.*)"), 0,
-      QFileDialog::DontUseNativeDialog);
+void updateLabel(QLabel* label, QElapsedTimer::Duration num) {
+  double duration = static_cast<double>(num.count());
+  label->setNum(duration);
 }
 
 QWidget* MainWindow::centralWidget(MainWindow* parent) {
   QWidget* central_widget = new QWidget(this);
   QGridLayout* layout = new QGridLayout();
+
   QWidget* total = new QWidget();
   layout->addWidget(total);
+
+  QLabel* label = new QLabel(total);
+  label->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+  label->setNum(68);
+  label->show();
+
+  QElapsedTimer* elapsed_timer = new QElapsedTimer();
+  elapsed_timer->start();
+  QTimer* timer = new QTimer();
+  timer->setInterval(1000);
+  timer->start();
+
+  connect(timer, &QTimer::timeout, this, [elapsed_timer, label]() {
+    auto elapsed = std::chrono::duration<double>(elapsed_timer->durationElapsed()).count();
+    label->setNum(static_cast<int>(elapsed));
+  });
+  
   QWidget* keyboard = new QWidget();
   layout->addWidget(keyboard);
+
+
+  QLabel* keyboard_label = new QLabel(keyboard);
+  keyboard_label->setText("keys pressed:");
+  keyboard_label->show();
+  
   central_widget->setLayout(layout);
   central_widget->show();
   return central_widget;

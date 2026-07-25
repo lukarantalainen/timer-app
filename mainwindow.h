@@ -13,7 +13,6 @@ class MainWindow : public QMainWindow {
     private:
     QMenuBar* menuBar(MainWindow* parent);
     QWidget* centralWidget(MainWindow* parent);
-    void open();
 };
 
 #endif
