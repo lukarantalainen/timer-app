@@ -12,6 +12,9 @@
 #include <QElapsedTimer>
 #include <QTimer>
 
+#include "input.h"
+
+
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
   resize(500, 500);
   setWindowTitle("Timer app");
@@ -64,10 +67,11 @@ QWidget* MainWindow::centralWidget(MainWindow* parent) {
   QWidget* keyboard = new QWidget();
   layout->addWidget(keyboard);
 
-
-  QLabel* keyboard_label = new QLabel(keyboard);
+  keyboard_label = new QLabel(keyboard);
   keyboard_label->setText("keys pressed:");
   keyboard_label->show();
+
+  input = new Input(6, keyboard_label);
   
   central_widget->setLayout(layout);
   central_widget->show();

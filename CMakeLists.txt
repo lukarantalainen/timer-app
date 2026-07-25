@@ -13,6 +13,7 @@ add_executable(TimerApp
   main.cpp
   mainwindow.cpp
   timer.cpp
+  input.cpp
 )
 
 target_link_libraries(TimerApp PRIVATE Qt6::Widgets)

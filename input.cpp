@@ -18,8 +18,10 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <sstream>
 
 #include "table.h"
+#include "input.h"
 
 int stop{};
 
@@ -36,25 +38,19 @@ const char* codename(unsigned int type, unsigned int code)
 	return (type <= EV_MAX) ? types[type][code] : "?";
 }
 
-int main(int argc, char* argv[])
+int Input::log(int device, QLabel* keyboard_label)
 {   
 	std::signal(SIGINT, interrupt_handler);
     std::signal(SIGKILL, interrupt_handler);
 
     const int timeout = 5;
     char* input_dev;
-    if (argc > 1) {
-        input_dev = argv[1];
-    } else {
-        std::cout << "Please input a device number" << "\n";
-        return 0;
-    }
 
     char* path = new(char[strlen(DEV_PATH)+1+1]);
 
     strcpy(path, DEV_PATH);
-    if (input_dev) {
-        strcat(path, input_dev);
+    if (device) {
+        path[strlen(DEV_PATH)] = device+'0';
     } else {
         strcat(path, "0");
     }
@@ -111,7 +107,15 @@ int main(int argc, char* argv[])
 			} else  {
 				keys[key] = 1;
 			}
-            printf("time: %lu type: %hu code: %hu (%s) value: %d\n", input_data->time.tv_sec, type, code, n, input_data->value);
+            if (!keyboard_label) {
+                printf("time: %lu type: %hu code: %hu (%s) value: %d\n", input_data->time.tv_sec, type, code, n, input_data->value);
+            } else {
+                std::ostringstream oss;
+                oss << "time: " << input_data->time.tv_sec << " type: " << type << " code: " << code << " value: " << input_data->value << " key: " << key; 
+                QString qstr = QString::fromStdString(oss.str());
+                keyboard_label->setText(qstr);
+                keyboard_label->adjustSize();
+            }
             memset(input_data,0,input_size);
         }
     }
@@ -127,3 +131,4 @@ int main(int argc, char* argv[])
     return 0;
 
 }
+

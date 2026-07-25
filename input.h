@@ -1,19 +1,16 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+#include <thread>
+#include <QLabel>
 class Input {
     public:
-    Input();
+    Input(int device, QLabel* keyboard_label) {
+        auto thread = new std::thread(&Input::log, this, device, keyboard_label);
+    }
 
-    void print();
+    private:
+    int log(int device, QLabel* keyboard_label = nullptr);
 };
-
-#ifdef __cplusplus
-} // extern "C";
-#endif
 
 #endif
