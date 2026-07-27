@@ -11,8 +11,12 @@
 #include <QLabel>
 #include <QElapsedTimer>
 #include <QTimer>
+#include <QObject>
 
 #include "input.h"
+#include "logdisplay.h"
+
+#include <iostream>
 
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
@@ -71,7 +75,14 @@ QWidget* MainWindow::centralWidget(MainWindow* parent) {
   keyboard_label->setText("keys pressed:");
   keyboard_label->show();
 
-  input = new Input(6, keyboard_label);
+  LogDisplay* logdisplay = new LogDisplay(keyboard);
+  logdisplay->show();
+
+  input = new Input(6);
+  input->start();
+
+  QObject::connect(input, &Input::key_pressed,
+                   logdisplay, &LogDisplay::append);
   
   central_widget->setLayout(layout);
   central_widget->show();

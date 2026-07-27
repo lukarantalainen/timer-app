@@ -2,15 +2,26 @@
 #define INPUT_H
 
 #include <thread>
-#include <QLabel>
-class Input {
+#include <functional>
+#include <QString>
+#include <QObject>
+
+class Input : public QObject {
+
+    Q_OBJECT
+
     public:
-    Input(int device, QLabel* keyboard_label) {
-        auto thread = new std::thread(&Input::log, this, device, keyboard_label);
-    }
+    Input(int device) : device{device} {}
+    void start();
+    
+    signals:
+        void key_pressed(const QString& key);
 
     private:
-    int log(int device, QLabel* keyboard_label = nullptr);
+    int log();
+
+    int device;
+    std::thread* thread;
 };
 
 #endif

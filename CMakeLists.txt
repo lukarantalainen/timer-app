@@ -14,6 +14,7 @@ add_executable(TimerApp
   mainwindow.cpp
   timer.cpp
   input.cpp
+  logdisplay.cpp
 )
 
 target_link_libraries(TimerApp PRIVATE Qt6::Widgets)
