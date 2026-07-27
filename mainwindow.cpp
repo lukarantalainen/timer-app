@@ -13,6 +13,7 @@
 #include <QTimer>
 #include <QObject>
 
+#include "timer.h"
 #include "input.h"
 #include "logdisplay.h"
 #include "keyboard_key.h"
@@ -51,22 +52,9 @@ QWidget* MainWindow::centralWidget(MainWindow* parent) {
   QGridLayout* layout = new QGridLayout();
 
   QWidget* total = new QWidget();
-  layout->addWidget(total);
 
-  QLabel* label = new QLabel(total);
-  label->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
-  label->show();
-
-  QElapsedTimer* elapsed_timer = new QElapsedTimer();
-  elapsed_timer->start();
-  QTimer* timer = new QTimer();
-  timer->setInterval(1000);
-  timer->start();
-
-  connect(timer, &QTimer::timeout, this, [elapsed_timer, label]() {
-    auto elapsed = std::chrono::duration<double>(elapsed_timer->durationElapsed()).count();
-    label->setNum(static_cast<int>(elapsed));
-  });
+  Timer* timer = new Timer(total);
+  layout->addWidget(timer);
   
   QWidget* keyboard = new QWidget();
   layout->addWidget(keyboard);
