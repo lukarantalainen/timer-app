@@ -1,5 +1,4 @@
-#ifndef KEYBOARD_KEY
-#define KEYBOARD_KEY
+#pragma once 
 
 #include <QKeyEvent>
 #include <QLabel>
@@ -20,5 +19,3 @@ class KeyboardKey : public QWidget {
 };
 
 QString QtKeyToChar(Qt::Key key);
-
-#endif

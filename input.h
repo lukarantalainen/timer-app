@@ -1,5 +1,4 @@
-#ifndef INPUT_H
-#define INPUT_H
+#pragma once 
 
 #include <thread>
 #include <functional>
@@ -23,5 +22,3 @@ class Input : public QObject {
     int device;
     std::thread* thread;
 };
-
-#endif

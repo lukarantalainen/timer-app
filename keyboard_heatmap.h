@@ -1,5 +1,4 @@
-#ifndef KEYBOARD_HEATMAP_H
-#define KEYBOARD_HEATMAP_H
+#pragma once
 
 #include <QWidget>
 #include <QGridLayout>
@@ -29,7 +28,7 @@ class KeyboardHeatmap : public QWidget {
   
 
   KeyboardHeatmap(KeyboardLayout layout, KeyboardSize size);
-  QGridLayout* layout = new QGridLayout();
+  
 
   
   private:
@@ -37,7 +36,3 @@ class KeyboardHeatmap : public QWidget {
   KeyboardSize size;
 };
 
-
-
-
-#endif

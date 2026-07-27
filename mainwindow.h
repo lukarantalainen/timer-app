@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include <QMenuBar>
@@ -20,5 +19,3 @@ class MainWindow : public QMainWindow {
     QLabel* keyboard_label = nullptr;
     Input* input = nullptr;
 };
-
-#endif

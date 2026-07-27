@@ -1,5 +1,4 @@
-#ifndef LOGDISPLAY_H
-#define LOGDISPLAY_H
+#pragma once 
 
 #include <QPlainTextEdit>
 #include <QObject>
@@ -18,4 +17,3 @@ class LogDisplay : public QPlainTextEdit {
 
 };
 
-#endif
