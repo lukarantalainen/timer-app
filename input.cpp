@@ -119,7 +119,7 @@ int Input::log() {
           << " code: " << code << " value: " << input_data->value
           << " key: " << key;
           QString qstr = QString::fromStdString(oss.str());
-          emit key_pressed(qstr);
+          emit keyPressed(qstr);
       }
       memset(input_data, 0, input_size);
     }

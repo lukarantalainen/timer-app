@@ -15,6 +15,7 @@
 
 #include "input.h"
 #include "logdisplay.h"
+#include "keyboard_key.h"
 
 #include <iostream>
 
@@ -54,7 +55,6 @@ QWidget* MainWindow::centralWidget(MainWindow* parent) {
 
   QLabel* label = new QLabel(total);
   label->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
-  label->setNum(68);
   label->show();
 
   QElapsedTimer* elapsed_timer = new QElapsedTimer();
@@ -81,7 +81,10 @@ QWidget* MainWindow::centralWidget(MainWindow* parent) {
   input = new Input(6);
   input->start();
 
-  QObject::connect(input, &Input::key_pressed,
+  KeyboardKey* key = new KeyboardKey(central_widget, Qt::Key_A);
+  key->show();
+
+  QObject::connect(input, &Input::keyPressed,
                    logdisplay, &LogDisplay::append);
   
   central_widget->setLayout(layout);

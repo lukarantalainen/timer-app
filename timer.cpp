@@ -13,22 +13,26 @@ using namespace std::chrono_literals;
 
 Timer::Timer() {
     start = std::chrono::steady_clock::now();
-    time(&date);
-    struct tm datetime = *localtime(&date);
+    
 
     elapsed += loadTime();
 
     char output[50];
 
-    strftime(output, 50, "%a %D %H", &datetime);
-    std::cout << output;
 
     std::thread t1(saveTime, this);
 
     while (true) {
         std::this_thread::sleep_for(1s);
         count();
-        std::cout << "\r" << elapsed << "     "<< std::flush;
+
+        time(&date);
+        struct tm datetime = *localtime(&date);
+        char output[50];
+
+        strftime(output, 50, "%D - %T", &datetime);
+
+        std::cout << "\r" << elapsed << "     " << output << std::flush;
     }
 }
 
@@ -36,7 +40,12 @@ double loadTime() {
     std::ifstream input(DATAPATH);
     std::string data;
     std::getline(input, data);
-    return stod(data);
+    if (data != "") {
+        return stod(data);
+    } else {
+        return 0;
+    }
+    
 }
 
 void saveTime(Timer* timer) {
@@ -49,4 +58,15 @@ void saveTime(Timer* timer) {
 
 void Timer::count() {
     ++elapsed;
+}
+
+double Timer::getElapsed() {
+    return elapsed;
+}
+
+int main() {
+    Timer timer;
+
+    return 0;
+
 }
