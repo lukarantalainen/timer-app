@@ -5,10 +5,11 @@
 #include <QString>
 #include <QObject>
 #include <linux/input.h>
+#include <string>
 
 struct KeyEvent {
-  input_event* event;
-  QString key_name;
+  input_event input_data;
+  std::string key_name;
 };
 
 

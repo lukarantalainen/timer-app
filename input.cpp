@@ -111,18 +111,9 @@ int Input::log() {
       } else {
         keys[key] = 1;
       }
-      if (false) {
-        printf("time: %lu type: %hu code: %hu (%s) value: %d\n",
-               input_data->time.tv_sec, type, code, n, input_data->value);
-      } else {
-          std::ostringstream oss;
-          oss << "time: " << input_data->time.tv_sec << " type: " << type
-          << " code: " << code << " value: " << input_data->value
-          << " key: " << key;
-          KeyEvent event {input_data, QString::fromStdString(key)};
-          QString qstr = QString::fromStdString(oss.str());
-          emit keyPressed(event);
-      }
+        
+        KeyEvent event {*input_data, key};
+        emit keyPressed(event);
       memset(input_data, 0, input_size);
     }
   }

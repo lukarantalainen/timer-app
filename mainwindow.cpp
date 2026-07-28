@@ -12,6 +12,7 @@
 #include <QPalette>
 #include <QTimer>
 #include <QWidget>
+#include <QTabWidget>
 #include <iostream>
 
 #include "input.h"
@@ -48,19 +49,15 @@ void updateLabel(QLabel* label, QElapsedTimer::Duration num) {
 
 QWidget* MainWindow::centralWidget(MainWindow* parent) {
   QWidget* central_widget = new QWidget(this);
-  QGridLayout* layout = new QGridLayout();
 
-  QMenuBar* menubar = menuBar(this);
+  QTabWidget* tabwidget = new QTabWidget(central_widget);
 
   QWidget* total = new QWidget();
-
   Timer* timer = new Timer(total);
-  layout->addWidget(timer);
 
-  QWidget* keyboard = new QWidget();
-  layout->addWidget(keyboard);
+  QWidget* log = new QWidget();
 
-  LogDisplay* logdisplay = new LogDisplay(keyboard);
+  LogDisplay* logdisplay = new LogDisplay(log);
   logdisplay->show();
 
   input = new Input(6);
@@ -68,13 +65,16 @@ QWidget* MainWindow::centralWidget(MainWindow* parent) {
 
   KeyboardHeatmap* heatmap =
       new KeyboardHeatmap(KeyboardLayout::QWERTY, KeyboardSize::SizeTKL80);
-  layout->addWidget(heatmap);
   heatmap->show();
+
+  tabwidget->addTab(heatmap, "Keyboard");
+  tabwidget->addTab(timer, "Timer");
+  tabwidget->addTab(log, "Log");
+  tabwidget->show();
 
   QObject::connect(input, &Input::keyPressed, heatmap, &KeyboardHeatmap::handleKeyPress);
   QObject::connect(input, &Input::keyPressed, logdisplay, &LogDisplay::append);
 
-  central_widget->setLayout(layout);
   central_widget->show();
   return central_widget;
 }

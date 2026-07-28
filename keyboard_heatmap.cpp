@@ -21,10 +21,10 @@ KeyboardHeatmap::KeyboardHeatmap(KeyboardLayout layout, KeyboardSize size)
 }
 
 void KeyboardHeatmap::handleKeyPress(const KeyEvent event) {
-  QString key_string = event.key_name;
-  key_string.remove(0, 4);
-  qDebug() << key_string;
-  QKeySequence key = QKeySequence(key_string);
+  std::string key_string = event.key_name.substr(4);
+  QString qkeystr = QString::fromStdString(key_string);
+  qDebug() << qkeystr;
+  QKeySequence key = QKeySequence(qkeystr);
   qDebug() << key[0].key();
 
   KeyboardKey* key_object = m_keys[key[0].key()];
