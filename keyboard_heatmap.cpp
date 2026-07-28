@@ -9,6 +9,9 @@
 #include <QKeyEvent>
 #include <QKeySequence>
 #include <QString>
+#include <bits/stdc++.h>
+
+#include <random>
 
 #include "keyboard_key.h"
 
@@ -17,19 +20,37 @@ KeyboardHeatmap::KeyboardHeatmap(KeyboardLayout layout, KeyboardSize size)
   m_layout = new QBoxLayout(QBoxLayout::Direction::TopToBottom, this);
 
   createKeys();
-  setStyleSheet("background-color: #222;");
+}
+
+double getPercentage(int min, int max, int x) {
+  int min_copy{min};
+  min -= min_copy;
+  max -= min_copy;
+  x -= min_copy;
+
+  return (double)x/max;
 }
 
 void KeyboardHeatmap::keyDown(const KeyEvent& event) {
   std::string key_string = event.key_name.substr(4);
   QString qkeystr = QString::fromStdString(key_string);
-  qDebug() << qkeystr;
   QKeySequence key = QKeySequence(qkeystr);
-  qDebug() << key[0].key();
 
   KeyboardKey* key_object = m_keys[key[0].key()];
   if (key_object) {
+    key_object->increment();
+    int count{key_object->getCount()};
+    if (count < min_value) {
+      min_value = count;
+    } else if (count > max_value) {
+      max_value = count;
+    }
+
+    qDebug() << "min: " << min_value << " max: " << max_value << " count: " << count << "\n";
     key_object->setStyle("color: red;");
+
+    double percentage = getPercentage(min_value, max_value, count);
+    key_object->updateColor(percentage);
   } 
 }
 

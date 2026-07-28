@@ -1,5 +1,6 @@
 #include "input.h"
 
+#include <dirent.h>
 #include <fcntl.h>
 #include <linux/input-event-codes.h>
 #include <linux/input.h>
@@ -11,43 +12,54 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <QString>
 #include <algorithm>
 #include <csignal>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <functional>
-
-#include <QString>
 
 #include "table.h"
 
-
-
-int stop{};
-
 constexpr char DEV_PATH[] = "/dev/input/event";
 
-std::map<std::string, int> keys = {};
-
-void interrupt_handler(int sig) { stop = true; }
-
 const char* codename(unsigned int type, unsigned int code) {
+  // TODO: add a check for code to avoid accessing out of bounds
   return (type <= EV_MAX) ? types[type][code] : "?";
 }
 
-void Input::start() {
-    thread = new std::thread(&Input::log, this);
+void Input::start() { thread = new std::thread(&Input::log, this); }
+
+int listInputs() {
+  DIR* dir = opendir("/dev/input");
+  if (!dir) {
+    perror("Failed to open directory");
+    return 1;
+  }
+
+  struct dirent* entry = readdir(dir);
+
+  std::vector<std::string> paths;
+  while (entry != nullptr) {
+    std::string name(entry->d_name);
+    if (name.find("event") != std::string::npos) {
+      std::string path = "/dev/input/" + name;
+      paths.push_back(path);
+    }
+    entry = readdir(dir);
+  }
+
+  for (auto path : paths) std::cout << path << "\n";
+
+  closedir(dir);
+  return 0;
 }
 
-
 int Input::log() {
-  //std::signal(SIGINT, interrupt_handler);
-  //std::signal(SIGKILL, interrupt_handler);
-
   const int timeout = 5;
   char* input_dev;
 
@@ -78,8 +90,7 @@ int Input::log() {
   int ret;
 
   while (true) {
-    if (stop == 1) break;
-    ret = poll(&fd, 1, timeout);
+    ret = poll(&fd, 1, -1);
 
     if (ret < 0) {
       printf("Failed poll\n");
@@ -106,19 +117,14 @@ int Input::log() {
       std::string key{codename(type, code)};
       const char* n = codename(type, code);
       printf("%s\n", codename(type, code));
-      if (keys.count(key)) {
-        ++keys[key];
+
+      KeyEvent event{*input_data, key};
+      if (input_data->value) {
+        emit keyDown(event);
       } else {
-        keys[key] = 1;
+        emit keyUp(event);
       }
-        
-        KeyEvent event {*input_data, key};
-        if (input_data->value) {
-          emit keyDown(event);
-        } else {
-          emit keyUp(event);
-        }
-        
+
       memset(input_data, 0, input_size);
     }
   }

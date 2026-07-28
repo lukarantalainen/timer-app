@@ -46,7 +46,10 @@ class KeyboardHeatmap : public QWidget {
   std::list<KeyboardKey*> home_row;
   std::list<KeyboardKey*> bottom_row;
 
-  std::map<Qt::Key, KeyboardKey*> m_keys; 
+  std::map<Qt::Key, KeyboardKey*> m_keys;
+
+  int min_value{};
+  int max_value{};
 
   void createKeys();
 

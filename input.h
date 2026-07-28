@@ -1,33 +1,34 @@
-#pragma once 
+#pragma once
 
-#include <thread>
-#include <functional>
-#include <QString>
-#include <QObject>
 #include <linux/input.h>
+
+#include <QObject>
+#include <QString>
+#include <functional>
 #include <string>
+#include <thread>
 
 struct KeyEvent {
   input_event input_data;
   std::string key_name;
 };
 
-
 class Input : public QObject {
+  Q_OBJECT
 
-    Q_OBJECT
+ public:
+  Input(int device) : device{device} {}
+  void start();
 
-    public:
-    Input(int device) : device{device} {}
-    void start();
-    
-    signals:
-        void keyDown(const KeyEvent);
-        void keyUp(const KeyEvent);
+ signals:
+  void keyDown(const KeyEvent);
+  void keyUp(const KeyEvent);
 
-    private:
-    int log();
+ private:
+  int log();
 
-    int device;
-    std::thread* thread;
+  int device;
+  std::thread* thread;
 };
+
+int listInputs();
