@@ -20,7 +20,7 @@ KeyboardHeatmap::KeyboardHeatmap(KeyboardLayout layout, KeyboardSize size)
   setStyleSheet("background-color: #222;");
 }
 
-void KeyboardHeatmap::handleKeyPress(const KeyEvent event) {
+void KeyboardHeatmap::keyDown(const KeyEvent& event) {
   std::string key_string = event.key_name.substr(4);
   QString qkeystr = QString::fromStdString(key_string);
   qDebug() << qkeystr;
@@ -30,8 +30,18 @@ void KeyboardHeatmap::handleKeyPress(const KeyEvent event) {
   KeyboardKey* key_object = m_keys[key[0].key()];
   if (key_object) {
     key_object->setStyle("color: red;");
-  }
-  
+  } 
+}
+
+void KeyboardHeatmap::keyUp(const KeyEvent& event) {
+  std::string key_string = event.key_name.substr(4);
+  QString qkeystr = QString::fromStdString(key_string);
+  QKeySequence key = QKeySequence(qkeystr);
+
+  KeyboardKey* key_object = m_keys[key[0].key()];
+  if (key_object) {
+    key_object->setDefaultStyle();
+  } 
 }
 
 void KeyboardHeatmap::createKeys() {

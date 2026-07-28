@@ -22,7 +22,8 @@ class Input : public QObject {
     void start();
     
     signals:
-        void keyPressed(const KeyEvent);
+        void keyDown(const KeyEvent);
+        void keyUp(const KeyEvent);
 
     private:
     int log();

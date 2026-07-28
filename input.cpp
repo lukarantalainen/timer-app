@@ -113,7 +113,12 @@ int Input::log() {
       }
         
         KeyEvent event {*input_data, key};
-        emit keyPressed(event);
+        if (input_data->value) {
+          emit keyDown(event);
+        } else {
+          emit keyUp(event);
+        }
+        
       memset(input_data, 0, input_size);
     }
   }

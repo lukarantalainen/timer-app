@@ -48,10 +48,9 @@ class KeyboardHeatmap : public QWidget {
 
   std::map<Qt::Key, KeyboardKey*> m_keys; 
 
-  
-
   void createKeys();
 
  public slots:
-  void handleKeyPress(const KeyEvent event);
+  void keyDown(const KeyEvent& event);
+  void keyUp(const KeyEvent& event);
 };

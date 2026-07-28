@@ -72,8 +72,13 @@ QWidget* MainWindow::centralWidget(MainWindow* parent) {
   tabwidget->addTab(log, "Log");
   tabwidget->show();
 
-  QObject::connect(input, &Input::keyPressed, heatmap, &KeyboardHeatmap::handleKeyPress);
-  QObject::connect(input, &Input::keyPressed, logdisplay, &LogDisplay::append);
+
+
+
+  QObject::connect(input, &Input::keyDown, heatmap, &KeyboardHeatmap::keyDown);
+  QObject::connect(input, &Input::keyDown, logdisplay, &LogDisplay::append);
+
+  QObject::connect(input, &Input::keyUp, heatmap, &KeyboardHeatmap::keyUp);
 
   central_widget->show();
   return central_widget;
