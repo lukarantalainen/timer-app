@@ -4,6 +4,13 @@
 #include <functional>
 #include <QString>
 #include <QObject>
+#include <linux/input.h>
+
+struct KeyEvent {
+  input_event* event;
+  QString key_name;
+};
+
 
 class Input : public QObject {
 
@@ -14,7 +21,7 @@ class Input : public QObject {
     void start();
     
     signals:
-        void keyPressed(const QString& key);
+        void keyPressed(const KeyEvent);
 
     private:
     int log();

@@ -19,5 +19,6 @@ Timer::Timer(QWidget* parent) : QWidget(parent) {
   connect(timer, &QTimer::timeout, this, [elapsed_timer, label]() {
     auto elapsed = std::chrono::duration<double>(elapsed_timer->durationElapsed()).count();
     label->setNum(static_cast<int>(elapsed));
+    label->adjustSize();
   });
 }

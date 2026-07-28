@@ -43,6 +43,7 @@ void Input::start() {
     thread = new std::thread(&Input::log, this);
 }
 
+
 int Input::log() {
   //std::signal(SIGINT, interrupt_handler);
   //std::signal(SIGKILL, interrupt_handler);
@@ -118,8 +119,9 @@ int Input::log() {
           oss << "time: " << input_data->time.tv_sec << " type: " << type
           << " code: " << code << " value: " << input_data->value
           << " key: " << key;
+          KeyEvent event {input_data, QString::fromStdString(key)};
           QString qstr = QString::fromStdString(oss.str());
-          emit keyPressed(qstr);
+          emit keyPressed(event);
       }
       memset(input_data, 0, input_size);
     }

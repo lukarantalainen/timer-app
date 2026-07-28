@@ -4,19 +4,20 @@
 #include <QChar>
 #include <QKeyEvent>
 
-KeyboardKey::KeyboardKey(QWidget* parent, Qt::Key key) : QWidget(parent), key{key} {
-    QString key_string = QtKeyToChar(key);
+KeyboardKey::KeyboardKey(QWidget* parent, Qt::Key key) : m_key {key}, QWidget(parent) {
+    setFixedSize(50, 50);
     
-    QLabel* label = createKeyLabel(key_string);
-    label->show();
+    m_label = new QLabel(QtKeyToChar(m_key), this);
+    m_label->setAlignment(Qt::AlignCenter);
+    m_label->setFixedSize(50, 50);
+    m_label->setStyleSheet("border: 1px solid #444; border-radius: 4px; background-color: #333; color: white; font-weight: bold;");
+    m_label->show();
   }
 
-QLabel* KeyboardKey::createKeyLabel(QString key_name) {
-  QLabel* key_label = new QLabel(key_name, this);
-
-  return key_label;
-
+void KeyboardKey::setStyle(const QString& style) {
+  m_label->setStyleSheet(style);
 }
+
 
 QString QtKeyToChar(Qt::Key key) {
   if (key >= Qt::Key_Space && key <= Qt::Key_AsciiTilde) {

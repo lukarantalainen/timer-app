@@ -1,13 +1,21 @@
 #pragma once
 
-#include <QWidget>
 #include <QGridLayout>
+#include <QObject>
+#include <QWidget>
+#include <QKeyEvent>
+
+#include <list>
+#include <map>
+
+#include "keyboard_key.h"
+#include "input.h"
 
 enum class KeyboardLayout {
-    QWERTY,
-    AZERTY,
-    DVORAK,
-    COLEMAK,
+  QWERTY,
+  AZERTY,
+  DVORAK,
+  COLEMAK,
 
 };
 
@@ -25,14 +33,25 @@ enum class KeyboardSize {
 };
 
 class KeyboardHeatmap : public QWidget {
-  
-
+  Q_OBJECT
+ public:
   KeyboardHeatmap(KeyboardLayout layout, KeyboardSize size);
-  
+
+ private:
+  QBoxLayout* m_layout;
+  KeyboardLayout m_key_layout;
+  KeyboardSize m_size;
+
+  std::list<KeyboardKey*> top_row;
+  std::list<KeyboardKey*> home_row;
+  std::list<KeyboardKey*> bottom_row;
+
+  std::map<Qt::Key, KeyboardKey*> m_keys; 
 
   
-  private:
-  KeyboardLayout layout;
-  KeyboardSize size;
+
+  void createKeys();
+
+ public slots:
+  void handleKeyPress(const KeyEvent event);
 };
-

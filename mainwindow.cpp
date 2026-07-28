@@ -1,30 +1,29 @@
+
 #include "mainwindow.h"
 
 #include <QAction>
 #include <QApplication>
+#include <QElapsedTimer>
 #include <QFileDialog>
 #include <QGridLayout>
 #include <QLabel>
 #include <QMainWindow>
-#include <QPalette>
-#include <QWidget>
-#include <QLabel>
-#include <QElapsedTimer>
-#include <QTimer>
 #include <QObject>
-
-#include "timer.h"
-#include "input.h"
-#include "logdisplay.h"
-#include "keyboard_key.h"
-
+#include <QPalette>
+#include <QTimer>
+#include <QWidget>
 #include <iostream>
 
+#include "input.h"
+#include "keyboard_heatmap.h"
+#include "keyboard_key.h"
+#include "logdisplay.h"
+#include "timer.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
   resize(500, 500);
   setWindowTitle("Timer app");
-  
+
   QIcon window_icon{"image.png"};
   setWindowIcon(window_icon);
 
@@ -51,17 +50,15 @@ QWidget* MainWindow::centralWidget(MainWindow* parent) {
   QWidget* central_widget = new QWidget(this);
   QGridLayout* layout = new QGridLayout();
 
+  QMenuBar* menubar = menuBar(this);
+
   QWidget* total = new QWidget();
 
   Timer* timer = new Timer(total);
   layout->addWidget(timer);
-  
+
   QWidget* keyboard = new QWidget();
   layout->addWidget(keyboard);
-
-  keyboard_label = new QLabel(keyboard);
-  keyboard_label->setText("keys pressed:");
-  keyboard_label->show();
 
   LogDisplay* logdisplay = new LogDisplay(keyboard);
   logdisplay->show();
@@ -69,12 +66,14 @@ QWidget* MainWindow::centralWidget(MainWindow* parent) {
   input = new Input(6);
   input->start();
 
-  KeyboardKey* key = new KeyboardKey(central_widget, Qt::Key_A);
-  key->show();
+  KeyboardHeatmap* heatmap =
+      new KeyboardHeatmap(KeyboardLayout::QWERTY, KeyboardSize::SizeTKL80);
+  layout->addWidget(heatmap);
+  heatmap->show();
 
-  QObject::connect(input, &Input::keyPressed,
-                   logdisplay, &LogDisplay::append);
-  
+  QObject::connect(input, &Input::keyPressed, heatmap, &KeyboardHeatmap::handleKeyPress);
+  QObject::connect(input, &Input::keyPressed, logdisplay, &LogDisplay::append);
+
   central_widget->setLayout(layout);
   central_widget->show();
   return central_widget;

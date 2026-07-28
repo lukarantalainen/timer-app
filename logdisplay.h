@@ -2,6 +2,7 @@
 
 #include <QPlainTextEdit>
 #include <QObject>
+#include "input.h"
 
 class LogDisplay : public QPlainTextEdit {
   Q_OBJECT
@@ -13,7 +14,7 @@ class LogDisplay : public QPlainTextEdit {
   }
 
   public slots:
-    void append(const QString& text);
+    void append(const KeyEvent event);
 
 };
 
