@@ -117,8 +117,8 @@ int main() {
   output << "    type_msc.data(),\n";
   output << "    type_sw.data(),\n";
   output << "    type_led.data(),\n";
-  output << "    type_snd.data(),\n";
   output << "    type_rep.data(),\n";
+  output << "    type_snd.data(),\n";
 
   output << "};\n";
 

@@ -806,6 +806,6 @@ std::array<const char**, EV_MAX> types {
     type_msc.data(),
     type_sw.data(),
     type_led.data(),
-    type_snd.data(),
     type_rep.data(),
+    type_snd.data(),
 };

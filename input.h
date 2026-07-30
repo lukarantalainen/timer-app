@@ -28,7 +28,7 @@ class Input : public QObject {
   int log();
 
   int device;
-  std::thread* thread;
+  std::thread* m_thread;
 };
 
 int listInputs();
