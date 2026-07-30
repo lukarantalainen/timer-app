@@ -38,7 +38,7 @@ void KeyboardHeatmap::keyDown(const KeyEvent& event) {
 
   KeyboardKey* key_object = m_keys[key[0].key()];
   if (key_object) {
-    key_object->increment();
+    key_object->keyDown();
     int count{key_object->getCount()};
     if (count < min_value) {
       min_value = count;
@@ -50,6 +50,7 @@ void KeyboardHeatmap::keyDown(const KeyEvent& event) {
     key_object->setStyle("color: red;");
 
     double percentage = getPercentage(min_value, max_value, count);
+    
     key_object->updateColor(percentage);
   } 
 }
@@ -61,11 +62,24 @@ void KeyboardHeatmap::keyUp(const KeyEvent& event) {
 
   KeyboardKey* key_object = m_keys[key[0].key()];
   if (key_object) {
-    key_object->setDefaultStyle();
+    key_object->keyUp();
   } 
 }
 
 void KeyboardHeatmap::createKeys() {
+  number_row = {
+    new KeyboardKey(this, Qt::Key_1),
+    new KeyboardKey(this, Qt::Key_2),
+    new KeyboardKey(this, Qt::Key_3),
+    new KeyboardKey(this, Qt::Key_4),
+    new KeyboardKey(this, Qt::Key_5),
+    new KeyboardKey(this, Qt::Key_6),
+    new KeyboardKey(this, Qt::Key_7),
+    new KeyboardKey(this, Qt::Key_8),
+    new KeyboardKey(this, Qt::Key_9),
+    new KeyboardKey(this, Qt::Key_0),
+  };
+
   top_row = {
     new KeyboardKey(this, Qt::Key_Q),
     new KeyboardKey(this, Qt::Key_W),
@@ -101,9 +115,22 @@ void KeyboardHeatmap::createKeys() {
     new KeyboardKey(this, Qt::Key_M),
   };
 
+  int col{};
+
+  QBoxLayout* number_row_layout = new QBoxLayout(QBoxLayout::Direction::LeftToRight);
+  number_row_layout->setSpacing(4);
+  for (auto it{number_row.begin()}; it != number_row.end(); ++it) {
+    m_keys.insert({(*it)->m_key, *it});
+    number_row_layout->addWidget(*it);
+    ++col;
+  }
+  number_row_layout->addStretch();
+  m_layout->addLayout(number_row_layout);
+
+
   QBoxLayout* top_row_layout = new QBoxLayout(QBoxLayout::Direction::LeftToRight);
   top_row_layout->setSpacing(4);
-  int col{};
+  col = 0;
   for (auto it{top_row.begin()}; it != top_row.end(); ++it) {
     m_keys.insert({(*it)->m_key, *it});
     top_row_layout->addWidget(*it);

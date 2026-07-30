@@ -42,6 +42,7 @@ class KeyboardHeatmap : public QWidget {
   KeyboardLayout m_key_layout;
   KeyboardSize m_size;
 
+  std::list<KeyboardKey*> number_row;
   std::list<KeyboardKey*> top_row;
   std::list<KeyboardKey*> home_row;
   std::list<KeyboardKey*> bottom_row;

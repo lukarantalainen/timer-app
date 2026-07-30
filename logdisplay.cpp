@@ -5,6 +5,10 @@
 #include "input.h"
 #include <sstream>
 
+LogDisplay::LogDisplay(QWidget* parent) : QPlainTextEdit(parent) {
+  setReadOnly(true);
+}
+
 void LogDisplay::append(const KeyEvent event) {
   if (this) {
 

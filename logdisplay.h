@@ -9,9 +9,7 @@ class LogDisplay : public QPlainTextEdit {
 
   public:
 
-  LogDisplay(QWidget* parent) : QPlainTextEdit(parent) {
-
-  }
+  LogDisplay(QWidget* parent);
 
   public slots:
     void append(const KeyEvent event);
