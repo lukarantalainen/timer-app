@@ -29,7 +29,7 @@ constexpr char DEV_PATH[] = "/dev/input/event";
 
 const char* codename(unsigned int type, unsigned int code) {
   // TODO: add a check for code to avoid accessing out of bounds
-  return (type < EV_CNT) ? types[type][code] : "?";
+  return (type <= EV_MAX && code <= max_size[type] && types[type] && types[type][code]) ? types[type][code] : "?";
 }
 
 void Input::start() { m_thread = new std::thread(&Input::log, this); }

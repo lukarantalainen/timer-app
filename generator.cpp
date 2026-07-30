@@ -22,32 +22,19 @@ std::string starts_with(std::string s) {
   return "?";
 }
 
-int main() {
+void generateInclude(std::ostream& output) {
+  output << "#pragma once\n";
+  output << "#include <array>\n";
+  output << "#include <linux/input-event-codes.h>\n\n";
+}
+
+void generateTypesFromHeader(std::ostream& output) {
   std::string header_path{"/usr/include/linux/input-event-codes.h"};
   std::ifstream input(header_path);
 
   std::string line;
 
   std::regex rgx("(?:#define )([^\\s]+)");
-
-  // enum evtype {
-  //     syn,
-  //     key,
-  //     rel,
-  //     abs,
-  //     msc,
-  //     sw,
-  //     led,
-  //     snd,
-  //     rep,
-  //     ff,
-  //     pwr,
-  //     rel,
-  // };
-
-  std::ofstream output("table.h");
-  output << "#include <array>\n";
-  output << "#include <linux/input-event-codes.h>\n\n";
 
   bool start;
   std::string previous;
@@ -89,24 +76,27 @@ int main() {
           output << "};\n\nstd::array<const char*, MSC_CNT> type_msc{\n";
           seen.insert("MSC");
         } else if (current == "SW" && !seen.count("SW")) {
-          output << "};\n\nstd::array<const char*, 25> type_sw{\n";
+          output << "};\n\nstd::array<const char*, SW_CNT+3> type_sw{\n";
           seen.insert("SW");
         } else if (current == "LED" && !seen.count("LED")) {
           output << "};\n\nstd::array<const char*, LED_CNT> type_led{\n";
           seen.insert("LED");
+        } else if (current == "REP" && !seen.count("REP")) {
+          output << "};\n\nstd::array<const char*, REP_CNT+2> type_rep{\n";
+          seen.insert("REP");
         } else if (current == "SND" && !seen.count("SND")) {
           output << "};\n\nstd::array<const char*, SND_CNT> type_snd{\n";
           seen.insert("SND");
-        } else if (current == "REP" && !seen.count("REP")) {
-          output << "};\n\nstd::array<const char*, 5> type_rep{\n";
-          seen.insert("REP");
-        }
+        } 
       }
 
       if (start) output << "    \"" << match_str << "\", \n";
       previous = current;
     }
   }
+}
+
+void generateTypeArray(std::ostream& output) {
   output << "};\n";
 
   output << "std::array<const char**, EV_MAX> types {\n";
@@ -119,8 +109,34 @@ int main() {
   output << "    type_led.data(),\n";
   output << "    type_rep.data(),\n";
   output << "    type_snd.data(),\n";
-
   output << "};\n";
+}
 
+void generateMaxSizes(std::ostream& output) {
+  output << "std::array<int, 9> max_size {\n";
+  output <<  "SYN_CNT,\n";
+  output <<  "KEY_CNT,\n";
+  output <<  "REL_CNT,\n";
+  output <<  "ABS_CNT,\n";
+  output <<  "MSC_CNT,\n";
+  output <<  "SW_CNT,\n";
+  output <<  "LED_CNT,\n";
+  output <<  "REP_CNT,\n";
+  output <<  "SND_CNT,\n";
+  output << "};\n";
+}
+
+int main(int argc, char* argv[]) {
+
+  if (argc>1) {
+    std::ofstream output(argv[1]);
+    generateInclude(output);
+    generateTypesFromHeader(output);
+    generateTypeArray(output);
+    generateMaxSizes(output);
+  } else {
+    return 1;
+  }
+  
   return 0;
 }
