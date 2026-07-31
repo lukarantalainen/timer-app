@@ -28,7 +28,6 @@
 constexpr char DEV_PATH[] = "/dev/input/event";
 
 const char* codename(unsigned int type, unsigned int code) {
-  // TODO: add a check for code to avoid accessing out of bounds
   return (type <= EV_MAX && code <= max_size[type] && types[type] && types[type][code]) ? types[type][code] : "?";
 }
 
@@ -116,7 +115,6 @@ int Input::log() {
     } else {
       std::string key{codename(type, code)};
       const char* n = codename(type, code);
-      printf("%s\n", codename(type, code));
 
       KeyEvent event{*input_data, key};
       if (input_data->value) {

@@ -17,6 +17,9 @@ KeyboardKey::KeyboardKey(QWidget* parent, Qt::Key key)
   m_label->show();
 
   m_label_palette = m_label->palette();
+  m_label_palette.setColor(QPalette::Window, Qt::darkGray);
+  m_label->setAutoFillBackground(true);
+  m_label->setPalette(m_label_palette);
 
   m_count_label = new QLabel(QString::number(0), this);
   m_count_label->setAlignment(Qt::AlignBottom);
@@ -89,6 +92,5 @@ void KeyboardKey::updateColor(double p) {
   }
 
   m_label_palette.setColor(QPalette::Window, color);
-  m_label->setAutoFillBackground(true);
   m_label->setPalette(m_label_palette);
 }

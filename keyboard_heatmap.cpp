@@ -10,6 +10,7 @@
 #include <QKeySequence>
 #include <QString>
 #include <bits/stdc++.h>
+#include <QPalette>
 
 #include <random>
 
@@ -19,6 +20,10 @@ KeyboardHeatmap::KeyboardHeatmap(KeyboardLayout layout, KeyboardSize size)
     : m_key_layout{layout}, m_size{size} {
   m_layout = new QBoxLayout(QBoxLayout::Direction::TopToBottom, this);
 
+  setAutoFillBackground(true);
+  QPalette pal = this->palette();
+  pal.setColor(QPalette::Window, Qt::gray);
+  this->setPalette(pal);
   createKeys();
 }
 
@@ -46,7 +51,6 @@ void KeyboardHeatmap::keyDown(const KeyEvent& event) {
       max_value = count;
     }
 
-    qDebug() << "min: " << min_value << " max: " << max_value << " count: " << count << "\n";
     key_object->setStyle("color: red;");
 
     double percentage = getPercentage(min_value, max_value, count);

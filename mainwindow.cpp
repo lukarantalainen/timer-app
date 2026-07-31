@@ -22,14 +22,15 @@
 #include "timer.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
-  resize(500, 500);
   setWindowTitle("Timer app");
 
   QIcon window_icon{"image.png"};
   setWindowIcon(window_icon);
 
   auto central_widget{centralWidget(this)};
+  central_widget->setFixedSize(600, 500);
   setCentralWidget(central_widget);
+  adjustSize();
 }
 
 QMenuBar* MainWindow::menuBar(MainWindow* parent) {

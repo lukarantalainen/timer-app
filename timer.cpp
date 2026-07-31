@@ -1,8 +1,8 @@
 #include "timer.h"
 
 #include <QLabel>
-#include <QElapsedTimer>
 #include <QTimer>
+#include <QTime>
 
 Timer::Timer(QWidget* parent) : QWidget(parent) {
 
@@ -10,15 +10,13 @@ Timer::Timer(QWidget* parent) : QWidget(parent) {
   label->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
   label->show();
 
-  QElapsedTimer* elapsed_timer = new QElapsedTimer();
-  elapsed_timer->start();
   QTimer* timer = new QTimer();
   timer->setInterval(1000);
   timer->start();
 
-  connect(timer, &QTimer::timeout, this, [elapsed_timer, label]() {
-    auto elapsed = std::chrono::duration<double>(elapsed_timer->durationElapsed()).count();
-    label->setNum(static_cast<int>(elapsed));
+  connect(timer, &QTimer::timeout, this, [this, label]() {
+    ++elapsed;
+    label->setText(QTime(0,0,0,0).addSecs(elapsed).toString("hh:mm:ss"));
     label->adjustSize();
   });
 }
