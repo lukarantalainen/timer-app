@@ -12,7 +12,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#include <QString>
 #include <algorithm>
 #include <csignal>
 #include <fstream>
@@ -25,6 +24,11 @@
 
 #include "table.h"
 
+#include <sys/socket.h>
+#include <sys/un.h>
+
+#include "connection.h"
+
 constexpr char DEV_PATH[] = "/dev/input/event";
 
 const char* codename(unsigned int type, unsigned int code) {
@@ -32,6 +36,64 @@ const char* codename(unsigned int type, unsigned int code) {
 }
 
 void Input::start() { m_thread = new std::thread(&Input::log, this); }
+
+void startConnection() {
+  int down_flag = 0;
+  int ret;
+  int connection_socket;
+  int data_socket;
+  ssize_t r, w;
+  struct sockaddr_un name;
+  char buffer[BUFFER_SIZE];
+
+
+  connection_socket = socket(AF_UNIX, SOCK_STREAM, 0);
+  if (connection_socket == -1) {
+    perror("socket");
+    exit(EXIT_FAILURE);
+  }
+
+  memset(&name, 0, sizeof(name));
+
+  name.sun_family = AF_UNIX;
+  strncpy(name.sun_path, SOCKET_NAME, sizeof(name.sun_path) - 1);
+
+  ret = bind(connection_socket, (const struct sockaddr *)&name, sizeof(name));
+  if (ret == -1) {
+    perror("bind");
+    exit(EXIT_FAILURE);
+  }
+
+  ret = listen(connection_socket, 20);
+  if (ret == -1) {
+    perror("listen");
+    exit(EXIT_FAILURE);
+  }
+
+  while (true) {
+    r = read(data_socket, buffer, sizeof(buffer));
+    if (r == -1) {
+      perror("read");
+      exit(EXIT_FAILURE);
+    }
+
+    buffer[sizeof(buffer)-1] = 0;
+
+    if (!strncmp(buffer, "DOWN", sizeof(buffer))) {
+      down_flag = 1;
+      continue;
+    }
+
+    if (!strncmp(buffer, "END", sizeof(buffer))) {
+      break;
+    }
+
+    if (down_flag) continue;
+  }
+
+  
+
+}
 
 int listInputs() {
   DIR* dir = opendir("/dev/input");
@@ -57,6 +119,9 @@ int listInputs() {
   closedir(dir);
   return 0;
 }
+
+void Input::keyUp(KeyEvent){}
+void Input::keyDown(KeyEvent){}
 
 int Input::log() {
   const int timeout = 5;
@@ -118,9 +183,10 @@ int Input::log() {
 
       KeyEvent event{*input_data, key};
       if (input_data->value) {
-        emit keyDown(event);
+        std::cout << key << "\n";
+        keyDown(event);
       } else {
-        emit keyUp(event);
+        keyUp(event);
       }
 
       memset(input_data, 0, input_size);
@@ -129,6 +195,16 @@ int Input::log() {
 
   close(fd.fd);
   delete input_data;
+
+  return 0;
+}
+
+int main() {
+  std::cout << sizeof(KeyEvent) << "\n";
+  Input input(6);
+  input.log();
+
+  std::cout << "test";
 
   return 0;
 }
