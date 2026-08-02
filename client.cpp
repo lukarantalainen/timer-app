@@ -32,14 +32,6 @@ int main(int argc, char** argv) {
     exit(EXIT_FAILURE);
   }
 
-  for (int i = 1; i < argc; ++i) {
-    w = write(data_socket, argv[i], strlen(argv[i]) + 1);
-    if (w == -1) {
-      perror("write");
-      break;
-    }
-  }
-
   strcpy(buffer, "END");
   w = write(data_socket, buffer, strlen(buffer) + 1);
   if (w == -1) {
@@ -47,17 +39,24 @@ int main(int argc, char** argv) {
     exit(EXIT_FAILURE);
   }
 
-  r = read(data_socket, buffer, sizeof(buffer));
   if (r == -1) {
     perror("read");
     exit(EXIT_FAILURE);
   }
 
-
   while (true) {
     ssize_t n = recv(data_socket, buffer, sizeof(buffer), 0);
-    buffer[sizeof(buffer) - 1] = 0;
-    printf("Result = %s\n", buffer);
+
+    if (n > 0) {
+      buffer[sizeof(buffer) - 1] = 0;
+      printf("%s\n", buffer);
+    } else if (n == 0) {
+      printf("no data");
+      break;
+    } else {
+      perror("recv");
+      break;
+    }
   }
 
   close(data_socket);

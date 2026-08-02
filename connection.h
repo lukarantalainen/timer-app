@@ -1,5 +1,5 @@
 #pragma once
-#include "input.h"
+#include <stddef.h>
 
-constexpr char SOCKET_NAME[] = "/tmp/loggertest.socket";
-constexpr size_t BUFFER_SIZE = sizeof(KeyEvent);
+static constexpr char SOCKET_NAME[] = "/tmp/loggertest.socket";
+static constexpr size_t BUFFER_SIZE = 12;
