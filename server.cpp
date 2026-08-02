@@ -34,11 +34,11 @@ Server::Server() {
     perror("accept");
     exit(EXIT_FAILURE);
   }
-  printf("client connected");
 }
 
 Server::~Server() {
   close(connection_socket);
+  close(data_socket);
   unlink(SOCKET_NAME);
 }
 

@@ -35,8 +35,7 @@ const char* codename(unsigned int type, unsigned int code) {
   return (type <= EV_MAX && code <= max_size[type] && types[type] && types[type][code]) ? types[type][code] : "?";
 }
 
-Input::Input(int device) : device{device} {
-  m_server = new Server;
+Input::Input(int device, Server* server) : device{device}, m_server{server} {
   m_thread = new std::thread(&Input::log, this);
 }
 
@@ -143,11 +142,23 @@ int Input::log() {
 
   return 0;
 }
+volatile sig_atomic_t signaled = 0;
+
+void handleSignal(int signal) {
+  signaled = 1;
+}
 
 int main() {
   using namespace std::chrono_literals;
 
-  Input input(6);
+  std::signal(SIGTERM, handleSignal);
+
+  Server server;
+  Input input(6, &server);
+
+  while(!signaled) {
+    pause();
+  }
 
   return 0;
 }

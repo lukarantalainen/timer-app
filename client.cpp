@@ -32,23 +32,11 @@ int main(int argc, char** argv) {
     exit(EXIT_FAILURE);
   }
 
-  strcpy(buffer, "END");
-  w = write(data_socket, buffer, strlen(buffer) + 1);
-  if (w == -1) {
-    perror("write");
-    exit(EXIT_FAILURE);
-  }
-
-  if (r == -1) {
-    perror("read");
-    exit(EXIT_FAILURE);
-  }
-
   while (true) {
     ssize_t n = recv(data_socket, buffer, sizeof(buffer), 0);
 
     if (n > 0) {
-      buffer[sizeof(buffer) - 1] = 0;
+      buffer[sizeof(buffer)] = 0;
       printf("%s\n", buffer);
     } else if (n == 0) {
       printf("no data");
@@ -60,7 +48,6 @@ int main(int argc, char** argv) {
   }
 
   close(data_socket);
-
   exit(EXIT_SUCCESS);
   
   return 0;

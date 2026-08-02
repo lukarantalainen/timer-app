@@ -16,7 +16,7 @@ struct KeyEvent {
 class Input {
 
  public:
-  Input(int device);
+  Input(int device, Server* server);
 
   void keyDown(const KeyEvent);
   void keyUp(const KeyEvent);
