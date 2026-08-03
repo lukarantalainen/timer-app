@@ -5,12 +5,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <linux/input.h>
+#include <iostream>
+#include "input.h"
 
+struct SerializedKeyEvent {
+  input_event input_data;
+  char key_name[32];
+};
+
+KeyEvent deserialize(const char* buffer) {
+  KeyEvent event;
+
+  const char* p = buffer;
+  
+  memcpy(&event.input_data, p, sizeof(input_event));
+  p += sizeof(input_event);
+
+  char str_buff[32];
+  strcpy(str_buff, p);
+  event.key_name = std::string(str_buff);
+
+  return event;
+}
 
 int main(int argc, char** argv) {
   int ret;
   int data_socket;
-  ssize_t r, w;
   sockaddr_un addr;
   char buffer[BUFFER_SIZE];
 
@@ -32,12 +53,15 @@ int main(int argc, char** argv) {
     exit(EXIT_FAILURE);
   }
 
+  int count{};
   while (true) {
     ssize_t n = recv(data_socket, buffer, sizeof(buffer), 0);
 
     if (n > 0) {
       buffer[sizeof(buffer)] = 0;
-      printf("%s\n", buffer);
+      KeyEvent event = deserialize(buffer);
+      std::cout << event.key_name << "\n";
+      ++count;
     } else if (n == 0) {
       printf("no data");
       break;

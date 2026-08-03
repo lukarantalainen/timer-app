@@ -15,6 +15,7 @@ class Server {
   Server();
   ~Server();
   int onKeyPress(KeyEvent event);
+  void acceptConnection();
 
   private:
   int ret;
@@ -23,4 +24,5 @@ class Server {
   size_t r, w;
   sockaddr_un name;
   char buffer[BUFFER_SIZE];
+  bool connected;
 };

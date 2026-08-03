@@ -37,6 +37,20 @@ Server::Server() {
   if (data_socket == -1) {
     perror("accept");
     exit(EXIT_FAILURE);
+  } else {
+    connected = true;
+  }
+}
+
+void Server::acceptConnection() {
+  while (true) {
+    data_socket = accept(connection_socket, NULL, NULL);
+    if (data_socket == -1) {
+      perror("accept");
+    } else {
+      connected = true;
+      break;
+    }
   }
 }
 
@@ -46,11 +60,29 @@ Server::~Server() {
   unlink(SOCKET_NAME);
 }
 
+struct SerializedKeyEvent {
+  input_event input_data;
+  char key_name[32];
+};
+
+SerializedKeyEvent serialize(KeyEvent event) {
+  SerializedKeyEvent s;
+  s.input_data = event.input_data;
+  strncpy(s.key_name, event.key_name.c_str(), sizeof(s.key_name) - 1);
+  return s;
+}
+
 int Server::onKeyPress(KeyEvent event) {
-  w = send(data_socket, "hello\0", 6, 0);
-  if (w == -1) {
-    perror("send");
-    exit(EXIT_FAILURE);
+  if (connected) {
+    auto serialized = serialize(event);
+    w = send(data_socket, &serialized, sizeof(serialized), 0);
+    if (w == -1) {
+      perror("send");
+      connected = false;
+    }
+  } else {
+    close(data_socket);
+    acceptConnection();
   }
   return 0;
 }
