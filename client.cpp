@@ -42,10 +42,10 @@ Client::Client() {
 }
 
 void Client::onKeyEvent(const KeyEvent& event) {
-  if (event.input_data.value == 0 || event.input_data.value == 2) {
-    emit(keyDown(event));
-  } else if (event.input_data.value == 1) {
+  if (event.input_data.value == 0) {
     emit(keyUp(event));
+  } else if (event.input_data.value == 1 || event.input_data.value == 2) {
+    emit(keyDown(event));
   }
 }
 
@@ -57,7 +57,6 @@ void Client::listen() {
       buffer[sizeof(buffer)] = 0;
       KeyEvent event = deserialize(buffer);
       onKeyEvent(event);
-      std::cout << event.key_name << " value: " << event.input_data.value << " code: " << event.input_data.code << " type: " << event.input_data.type << "\n";
     } else if (n == 0) {
       printf("no data");
       break;

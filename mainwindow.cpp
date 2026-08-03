@@ -74,9 +74,11 @@ QWidget* MainWindow::centralWidget(MainWindow* parent) {
 
 
   QObject::connect(client, &Client::keyDown, heatmap, &KeyboardHeatmap::keyDown);
-  QObject::connect(client, &Client::keyDown, logdisplay, &LogDisplay::append);
-
   QObject::connect(client, &Client::keyUp, heatmap, &KeyboardHeatmap::keyUp);
+  
+  QObject::connect(client, &Client::keyDown, logdisplay, &LogDisplay::append);
+  QObject::connect(client, &Client::keyUp, logdisplay, &LogDisplay::append);
+
 
   central_widget->show();
   return central_widget;
