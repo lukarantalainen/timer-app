@@ -13,7 +13,6 @@ class MainWindow : public QMainWindow {
     virtual ~MainWindow() = default;
 
     private:
-    QMenuBar* menuBar(MainWindow* parent);
     QWidget* centralWidget(MainWindow* parent);
     
     QLabel* keyboard_label = nullptr;

@@ -6,14 +6,15 @@
 #include <linux/input.h>
 #include <linux/kernel.h>
 #include <poll.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 #include <time.h>
 #include <unistd.h>
 
 #include <algorithm>
 #include <csignal>
+#include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -22,21 +23,21 @@
 #include <string>
 #include <vector>
 
+#include "server.h"
 #include "table.h"
 
-#include <sys/socket.h>
-#include <sys/un.h>
-
-#include "server.h"
-
 constexpr char DEV_PATH[] = "/dev/input/event";
+volatile sig_atomic_t signaled = 0;
 
 const char* codename(unsigned int type, unsigned int code) {
-  return (type <= EV_MAX && code <= max_size[type] && types[type] && types[type][code]) ? types[type][code] : "?";
+  return (type <= EV_MAX && code <= max_size[type] && types[type] &&
+          types[type][code])
+             ? types[type][code]
+             : "?";
 }
 
 Input::Input(int device, Server* server) : device{device}, m_server{server} {
-  m_thread = new std::thread(&Input::log, this);
+  log();
 }
 
 int listInputs() {
@@ -64,20 +65,19 @@ int listInputs() {
   return 0;
 }
 
-void Input::keyUp(KeyEvent){}
-void Input::keyDown(KeyEvent){}
+void Input::keyUp(KeyEvent) {}
+void Input::keyDown(KeyEvent) {}
 
 int Input::log() {
-  const int timeout = 5;
   char* input_dev;
 
   char* path = new (char[strlen(DEV_PATH) + 1 + 1]);
 
-  strcpy(path, DEV_PATH);
+  std::strcpy(path, DEV_PATH);
   if (device) {
-    path[strlen(DEV_PATH)] = device + '0';
+    path[std::strlen(DEV_PATH)] = device + '0';
   } else {
-    strcat(path, "0");
+    std::strcat(path, "0");
   }
 
   struct pollfd fd;
@@ -85,23 +85,27 @@ int Input::log() {
   fd.fd = open(path, O_RDONLY | O_NOCTTY | O_NONBLOCK);
 
   if (fd.fd < 0) {
-    perror("failed to open device");
+    std::perror("failed to open device");
     return (-1);
   }
 
   const int input_size = sizeof(input_event);
   struct input_event* input_data = new input_event;
-  memset(input_data, 0, input_size);
+  std::memset(input_data, 0, input_size);
 
   fd.events = POLLIN;
 
   int ret;
 
   while (true) {
+    if (signaled) {
+      break;
+    }
+
     ret = poll(&fd, 1, -1);
 
     if (ret < 0) {
-      printf("Failed poll\n");
+      std::cout << "Failed poll" << "\n";
       break;
     }
 
@@ -119,7 +123,7 @@ int Input::log() {
     if (type != 1) continue;
 
     if (rd < input_size) {
-      printf("failed\n");
+      std::cout << "failed read" << "\n";
       return -1;
     } else {
       std::string key{codename(type, code)};
@@ -128,20 +132,18 @@ int Input::log() {
       const KeyEvent event{*input_data, key};
       m_server->onKeyEvent(event);
 
-      memset(input_data, 0, input_size);
+      std::memset(input_data, 0, input_size);
     }
   }
 
-  close(fd.fd);
+  ::close(fd.fd);
   delete input_data;
 
   return 0;
 }
-volatile sig_atomic_t signaled = 0;
 
-void handleSignal(int signal) {
-  signaled = 1;
-}
+
+void handleSignal(int signal) { signaled = 1; }
 
 int main() {
   using namespace std::chrono_literals;
@@ -150,10 +152,6 @@ int main() {
 
   Server server;
   Input input(6, &server);
-
-  while(!signaled) {
-    pause();
-  }
 
   return 0;
 }

@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
+#include <QApplication>
 
 #include <csignal>
 #include <cstdlib>
@@ -11,7 +12,7 @@
 #include <iostream>
 
 #include "connection.h"
-#include "input.h"
+#include "keyevent.h"
 
 Client::Client() {
   int ret;
@@ -19,7 +20,6 @@ Client::Client() {
   data_socket = socket(AF_UNIX, SOCK_SEQPACKET, 0);
   if (data_socket == -1) {
     std::perror("socket");
-    std::exit(1);
   }
 
   std::memset(&addr, 0, sizeof(addr));
@@ -28,14 +28,36 @@ Client::Client() {
   std::strncpy(addr.sun_path, SOCKET_NAME, sizeof(addr.sun_path) - 1);
   addr.sun_path[sizeof(addr.sun_path) - 1] = '\0';
 
-  ret = ::connect(data_socket, (const sockaddr*)&addr, sizeof(addr));
+  // ret = ::connect(data_socket, (const sockaddr*)&addr, sizeof(addr));
 
-  if (ret == -1) {
-    fprintf(stderr, "The server is down.\n");
-    std::exit(1);
+  // if (ret == -1) {
+  //   fprintf(stderr, "The server is down.\n");
+  // }
+  connect();
+
+  m_thread = std::thread(&Client::listen, this);
+}
+
+void Client::connect() {
+  int ret;
+  int count{1};
+  ::close(data_socket);
+
+  data_socket = socket(AF_UNIX, SOCK_SEQPACKET, 0);
+  if (data_socket == -1) {
+    std::perror("socket");
   }
 
-  m_thread = std::thread(&Client::listen, this); 
+  while (true) {
+    ret = ::connect(data_socket, (const sockaddr*)&addr, sizeof(addr));
+    if (ret == 0) {
+      std::cout << "Connected" << "\n";
+      return;
+    }
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::cout << "Trying to connect: " << count << "\n";
+    ++count;
+  }
 }
 
 void Client::onKeyEvent(const KeyEvent& event) {
@@ -55,18 +77,16 @@ void Client::listen() {
       KeyEvent event = deserialize(buffer);
       onKeyEvent(event);
     } else if (n == 0) {
-      std::printf("no data");
-      break;
+      std::cout << "Server has closed connection" << "\n";
+      connect();
     } else {
       std::perror("recv");
-      break;
+      connect();
     }
   }
 }
 
-Client::~Client() {
-  ::close(data_socket);
-}
+Client::~Client() { ::close(data_socket); }
 
 KeyEvent deserialize(const char* buffer) {
   KeyEvent event;
@@ -82,4 +102,3 @@ KeyEvent deserialize(const char* buffer) {
 
   return event;
 }
-

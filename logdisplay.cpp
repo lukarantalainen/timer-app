@@ -5,13 +5,14 @@
 #include "input.h"
 #include <sstream>
 
-LogDisplay::LogDisplay(QWidget* parent) : QPlainTextEdit(parent) {
-  setReadOnly(true);
+LogDisplay::LogDisplay(QWidget* parent) : QWidget(parent) {
+  
+  m_textedit = new QPlainTextEdit(this);
+  m_textedit->setReadOnly(true);
 }
 
 void LogDisplay::append(const KeyEvent event) {
   if (this) {
-
     input_event input_data = event.input_data;
     
     std::ostringstream oss;
@@ -19,8 +20,8 @@ void LogDisplay::append(const KeyEvent event) {
     << " code: " << input_data.code << " value: " << input_data.value
     << " key: " << event.key_name;
 
-    this->appendPlainText(QString::fromStdString(oss.str()));
-    this->verticalScrollBar()->setValue(this->verticalScrollBar()->maximum());
+    m_textedit->appendPlainText(QString::fromStdString(oss.str()));
+    m_textedit->verticalScrollBar()->setValue(m_textedit->verticalScrollBar()->maximum());
   }
   
 }

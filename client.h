@@ -28,6 +28,7 @@ class Client : public QObject {
   std::thread m_thread;
 
   void listen();
+  void connect();
   void onKeyEvent(const KeyEvent& event);
 };
 

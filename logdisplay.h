@@ -1,10 +1,11 @@
 #pragma once 
 
 #include <QPlainTextEdit>
+#include <QWidget>
 #include <QObject>
 #include "input.h"
 
-class LogDisplay : public QPlainTextEdit {
+class LogDisplay : public QWidget {
   Q_OBJECT
 
   public:
@@ -14,5 +15,7 @@ class LogDisplay : public QPlainTextEdit {
   public slots:
     void append(const KeyEvent event);
 
+  private:
+  QPlainTextEdit* m_textedit;
 };
 
