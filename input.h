@@ -5,12 +5,9 @@
 #include <functional>
 #include <string>
 #include <thread>
+#include "keyevent.h"
 
 class Server;
-struct KeyEvent {
-  input_event input_data;
-  std::string key_name;
-};
 
 class Input {
 

@@ -28,10 +28,10 @@ add_executable(TimerApp
   main.cpp
   mainwindow.cpp
   timer.cpp
-  input.cpp
   logdisplay.cpp
   keyboard_key.cpp
   keyboard_heatmap.cpp
+  client.cpp
 )
 
 add_dependencies(TimerApp generate_headers)

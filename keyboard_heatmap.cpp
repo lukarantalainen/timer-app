@@ -15,6 +15,7 @@
 #include <random>
 
 #include "keyboard_key.h"
+#include "keyevent.h"
 
 KeyboardHeatmap::KeyboardHeatmap(KeyboardLayout layout, KeyboardSize size)
     : m_key_layout{layout}, m_size{size} {

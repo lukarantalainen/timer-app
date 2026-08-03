@@ -15,11 +15,11 @@
 #include <QTabWidget>
 #include <iostream>
 
-#include "input.h"
 #include "keyboard_heatmap.h"
 #include "keyboard_key.h"
 #include "logdisplay.h"
 #include "timer.h"
+#include "client.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
   setWindowTitle("Timer app");
@@ -61,8 +61,7 @@ QWidget* MainWindow::centralWidget(MainWindow* parent) {
   LogDisplay* logdisplay = new LogDisplay(log);
   logdisplay->show();
 
-  input = new Input(6);
-  input->start();
+  Client* client = new Client();
 
   KeyboardHeatmap* heatmap =
       new KeyboardHeatmap(KeyboardLayout::QWERTY, KeyboardSize::SizeTKL80);
@@ -74,12 +73,10 @@ QWidget* MainWindow::centralWidget(MainWindow* parent) {
   tabwidget->show();
 
 
+  QObject::connect(client, &Client::keyDown, heatmap, &KeyboardHeatmap::keyDown);
+  QObject::connect(client, &Client::keyDown, logdisplay, &LogDisplay::append);
 
-
-  QObject::connect(input, &Input::keyDown, heatmap, &KeyboardHeatmap::keyDown);
-  QObject::connect(input, &Input::keyDown, logdisplay, &LogDisplay::append);
-
-  QObject::connect(input, &Input::keyUp, heatmap, &KeyboardHeatmap::keyUp);
+  QObject::connect(client, &Client::keyUp, heatmap, &KeyboardHeatmap::keyUp);
 
   central_widget->show();
   return central_widget;
