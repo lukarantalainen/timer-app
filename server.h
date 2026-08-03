@@ -14,7 +14,7 @@ class Server {
   public:
   Server();
   ~Server();
-  int onKeyPress(KeyEvent event);
+  int onKeyEvent(const KeyEvent& event);
   void acceptConnection();
 
   private:

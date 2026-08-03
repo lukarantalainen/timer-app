@@ -125,13 +125,8 @@ int Input::log() {
       std::string key{codename(type, code)};
       const char* n = codename(type, code);
 
-      KeyEvent event{*input_data, key};
-      m_server->onKeyPress(event);
-      if (input_data->value) {
-        keyDown(event);
-      } else {
-        keyUp(event);
-      }
+      const KeyEvent event{*input_data, key};
+      m_server->onKeyEvent(event);
 
       memset(input_data, 0, input_size);
     }

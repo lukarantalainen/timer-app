@@ -14,7 +14,7 @@
 #include <linux/input.h>
 #include "input.h"
 #include <iostream>
-
+#include <cstring>
 
 struct SerializedKeyEvent {
   input_event input_data;
@@ -55,7 +55,14 @@ int main() {
   const char* bytes = reinterpret_cast<const char*>(&s);
 
   KeyEvent des = deserialize(bytes);
-  printf("%d %d %d %s", des.input_data.code, des.input_data.type, des.input_data.value, des.key_name.c_str());
+  printf("%d %d %d %s\n", des.input_data.code, des.input_data.type, des.input_data.value, des.key_name.c_str());
+
+  const char* str = "abcdefghijklmnopqrstuvwxyz";
+
+  char test_str[16];
+  std::strncpy(test_str, str, sizeof(test_str) - 1);
+  test_str[sizeof(test_str) - 1] = '\0';
+  std::cout << test_str << "\n";
 
   return 0;
 }

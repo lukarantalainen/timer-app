@@ -1,13 +1,14 @@
-#include "connection.h"
 #include "server.h"
-#include "input.h"
 
-#include <sys/socket.h>
-#include <sys/un.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
+#include <sys/un.h>
+#include <unistd.h>
+
+#include "connection.h"
+#include "input.h"
 
 Server::Server() {
   unlink(SOCKET_NAME);
@@ -60,24 +61,19 @@ Server::~Server() {
   unlink(SOCKET_NAME);
 }
 
-struct SerializedKeyEvent {
-  input_event input_data;
-  char key_name[32];
-};
-
-SerializedKeyEvent serialize(KeyEvent event) {
+SerializedKeyEvent serialize(const KeyEvent& event) {
   SerializedKeyEvent s;
   s.input_data = event.input_data;
   strncpy(s.key_name, event.key_name.c_str(), sizeof(s.key_name) - 1);
+  s.key_name[sizeof(s.key_name) - 1] = '\0';
   return s;
 }
 
-int Server::onKeyPress(KeyEvent event) {
+int Server::onKeyEvent(const KeyEvent& event) {
   if (connected) {
     auto serialized = serialize(event);
     w = send(data_socket, &serialized, sizeof(serialized), 0);
     if (w == -1) {
-      perror("send");
       connected = false;
     }
   } else {
@@ -86,66 +82,3 @@ int Server::onKeyPress(KeyEvent event) {
   }
   return 0;
 }
-
-// int main() {
-//   // int ret;
-//   // int connection_socket;
-//   // int data_socket;
-//   // ssize_t r, w;
-//   // sockaddr_un name;
-//   // char buffer[BUFFER_SIZE];
-  
-//   // unlink(SOCKET_NAME);
-
-//   // connection_socket = socket(AF_UNIX, SOCK_SEQPACKET, 0);
-//   // if (connection_socket == -1) {
-//   //   perror("socket");
-//   //   exit(EXIT_FAILURE);
-//   // }
-
-//   // memset(&name, 0, sizeof(name));
-
-//   // name.sun_family = AF_UNIX;
-//   // strncpy(name.sun_path, SOCKET_NAME, sizeof(name.sun_path) - 1);
-
-//   // ret = bind(connection_socket, (const sockaddr*)&name, sizeof(name));
-
-//   // if (ret == -1) {
-//   //   perror("bind");
-//   //   exit(EXIT_FAILURE);
-//   // }
-
-//   // ret = listen(connection_socket, 20);
-//   // while (true) {
-    
-
-//   //   data_socket = accept(connection_socket, NULL, NULL);
-//   //   if (data_socket == -1) {
-//   //     perror("accept");
-//   //     exit(EXIT_FAILURE);
-//   //   }
-//   //   printf("client connected");
-
-//   //   while (true) {
-//   //     sleep(1);
-//   //     w = send(data_socket, "hello\0", 6, 0);
-//   //     if (w == -1) {
-//   //       perror("send");
-//   //       exit(EXIT_FAILURE);
-//   //     }
-//   //   }
-    
-//   // }
-
-//   // close(connection_socket);
-
-//   // unlink(SOCKET_NAME);
-
-//   Server server;
-//   while (true) {
-//     server.onKeyPress();
-//     sleep(1);
-//   }
-
-//   exit(EXIT_SUCCESS);
-// }
