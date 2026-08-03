@@ -78,7 +78,7 @@ int Server::onKeyEvent(const KeyEvent& event) {
     auto serialized = serialize(event);
     w = ::send(data_socket, &serialized, sizeof(serialized), 0);
     if (w == -1) {
-      std::perror("Send");
+      std::cout << "Client disconnected" << "\n";
       connected = false;
     }
   } else {

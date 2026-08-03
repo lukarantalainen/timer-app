@@ -1,28 +1,25 @@
 #include "client.h"
 
 #include <linux/input.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
 
 #include <csignal>
+#include <cstdlib>
 #include <cstring>
 #include <iostream>
 
 #include "connection.h"
 #include "input.h"
 
-
-
 Client::Client() {
   int ret;
 
   data_socket = socket(AF_UNIX, SOCK_SEQPACKET, 0);
   if (data_socket == -1) {
-    perror("socket");
-    exit(EXIT_FAILURE);
+    std::perror("socket");
+    std::exit(1);
   }
 
   std::memset(&addr, 0, sizeof(addr));
@@ -35,7 +32,7 @@ Client::Client() {
 
   if (ret == -1) {
     fprintf(stderr, "The server is down.\n");
-    exit(EXIT_FAILURE);
+    std::exit(1);
   }
 
   m_thread = std::thread(&Client::listen, this); 
@@ -51,24 +48,24 @@ void Client::onKeyEvent(const KeyEvent& event) {
 
 void Client::listen() {
   while (true) {
-    ssize_t n = recv(data_socket, buffer, sizeof(buffer), 0);
+    ssize_t n = ::recv(data_socket, buffer, sizeof(buffer), 0);
 
     if (n > 0) {
-      buffer[sizeof(buffer)] = 0;
+      buffer[sizeof(buffer)] = '\0';
       KeyEvent event = deserialize(buffer);
       onKeyEvent(event);
     } else if (n == 0) {
-      printf("no data");
+      std::printf("no data");
       break;
     } else {
-      perror("recv");
+      std::perror("recv");
       break;
     }
   }
 }
 
 Client::~Client() {
-  close(data_socket);
+  ::close(data_socket);
 }
 
 KeyEvent deserialize(const char* buffer) {
