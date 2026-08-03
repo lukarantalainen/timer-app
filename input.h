@@ -5,12 +5,12 @@
 #include <functional>
 #include <string>
 #include <thread>
+
 #include "keyevent.h"
 
 class Server;
 
 class Input {
-
  public:
   Input(int device, Server* server);
 
@@ -19,7 +19,6 @@ class Input {
   int log();
 
  private:
-
   int device;
   std::thread* m_thread;
   Server* m_server;
