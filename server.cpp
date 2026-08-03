@@ -1,11 +1,13 @@
 #include "connection.h"
 #include "server.h"
+#include "input.h"
 
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 Server::Server() {
   unlink(SOCKET_NAME);
@@ -22,6 +24,8 @@ Server::Server() {
   strncpy(name.sun_path, SOCKET_NAME, sizeof(name.sun_path) - 1);
 
   ret = bind(connection_socket, (const sockaddr*)&name, sizeof(name));
+
+  chmod(SOCKET_NAME, 0666);
 
   if (ret == -1) {
     perror("bind");
@@ -42,7 +46,7 @@ Server::~Server() {
   unlink(SOCKET_NAME);
 }
 
-int Server::onKeyPress() {
+int Server::onKeyPress(KeyEvent event) {
   w = send(data_socket, "hello\0", 6, 0);
   if (w == -1) {
     perror("send");

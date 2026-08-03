@@ -8,11 +8,13 @@
 
 #include "connection.h"
 
+class KeyEvent;
+
 class Server {
   public:
   Server();
   ~Server();
-  int onKeyPress();
+  int onKeyPress(KeyEvent event);
 
   private:
   int ret;

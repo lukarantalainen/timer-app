@@ -126,7 +126,7 @@ int Input::log() {
       const char* n = codename(type, code);
 
       KeyEvent event{*input_data, key};
-      m_server->onKeyPress();
+      m_server->onKeyPress(event);
       if (input_data->value) {
         keyDown(event);
       } else {

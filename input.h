@@ -6,8 +6,7 @@
 #include <string>
 #include <thread>
 
-#include "server.h"
-
+class Server;
 struct KeyEvent {
   input_event input_data;
   std::string key_name;
