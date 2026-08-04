@@ -46,6 +46,15 @@ Server::Server() {
   acceptConnection();
 }
 
+void Server::check_status() {
+  r = recv(data_socket, buffer, BUFFER_SIZE, 0);
+  if (r == -1) {
+    connected = true;
+    std::cout << "Client disconnected";
+    acceptConnection();
+  }
+}
+
 void Server::acceptConnection() {
   while (true) {
     data_socket = ::accept(connection_socket, NULL, NULL);

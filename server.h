@@ -16,6 +16,7 @@ class Server {
   ~Server();
   int onKeyEvent(const KeyEvent& event);
   void acceptConnection();
+  void check_status();
 
   private:
   int ret;
