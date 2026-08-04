@@ -17,7 +17,7 @@ class Server {
   int onKeyEvent(const KeyEvent& event);
   void acceptConnection();
   void check_status();
-  int send_all(const void* data, size_t size);
+  int send_all(const void* data, const size_t size);
 
   private:
   int ret;
@@ -27,4 +27,6 @@ class Server {
   sockaddr_un name;
   char buffer[BUFFER_SIZE];
   bool connected;
+
+  void clientDisconnected();
 };

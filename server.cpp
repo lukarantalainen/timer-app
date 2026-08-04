@@ -82,34 +82,48 @@ SerializedKeyEvent serialize(const KeyEvent& event) {
   return s;
 }
 
-int Server::send_all(const void* data, size_t size) {
+int Server::send_all(const void* data, const size_t size) {
   const char* ptr = static_cast<const char*>(data);
   size_t sent = 0;
 
   while (sent < size) {
     ssize_t n = ::send(data_socket, ptr + sent, size - sent, 0);
-    if (n < 0) {
+    if (n <= 0) {
       return n;
     }
+
     sent += n;
+    std::cout << sent << "\n";
   }
   return sent;
 }
 
+void Server::clientDisconnected() {
+  std::cout << "Client disconnected" << "\n";
+  connected = false;
+  ::close(data_socket);
+  acceptConnection();
+}
+
 int Server::onKeyEvent(const KeyEvent& event) {
   if (!connected) {
-    ::close(data_socket);
-    acceptConnection();
+    clientDisconnected();
   } else {
     auto serialized = serialize(event);
     size_t size = sizeof(serialized);
-
-    send_all(&size, sizeof(size));
+    
+    w = send_all(&size, sizeof(size));
+    if (w == -1) {
+      clientDisconnected();
+      return 0;
+    }
+    
 
     w = send_all(&serialized, sizeof(serialized));
-    if (w == -1) {
-      std::cout << "Client disconnected" << "\n";
-      connected = false;
+    std::cout << w << "\n\n";
+    if (w <= 0) {
+      clientDisconnected();
+      return 0;
     }
   }
   return 0;
