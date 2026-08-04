@@ -4,8 +4,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
-#include <QApplication>
 
+#include <QApplication>
 #include <csignal>
 #include <cstdlib>
 #include <cstring>
@@ -17,7 +17,7 @@
 Client::Client() {
   int ret;
 
-  data_socket = socket(AF_UNIX, SOCK_SEQPACKET, 0);
+  data_socket = socket(AF_UNIX, SOCK_STREAM, 0);
   if (data_socket == -1) {
     std::perror("socket");
   }
@@ -43,7 +43,7 @@ void Client::connect() {
   int count{1};
   ::close(data_socket);
 
-  data_socket = socket(AF_UNIX, SOCK_SEQPACKET, 0);
+  data_socket = socket(AF_UNIX, SOCK_STREAM, 0);
   if (data_socket == -1) {
     std::perror("socket");
   }
@@ -68,21 +68,42 @@ void Client::onKeyEvent(const KeyEvent& event) {
   }
 }
 
+int Client::recv_all(void* data, size_t size) {
+  char* ptr = static_cast<char*>(data);
+
+  int rv = 0;
+
+  while (rv < size) {
+    int n = ::recv(data_socket, ptr, size - rv, 0);
+
+    if (n == -1) {
+      perror("recv");
+      return -1;
+    }
+    rv += n;
+  }
+  return rv;
+}
+
 void Client::listen() {
   while (true) {
-    ssize_t n = ::recv(data_socket, buffer, sizeof(buffer), 0);
+    size_t size;
+    recv_all(&size, sizeof(size));
 
-    if (n > 0) {
-      buffer[sizeof(buffer)] = '\0';
-      KeyEvent event = deserialize(buffer);
-      onKeyEvent(event);
-    } else if (n == 0) {
+
+    int n = recv_all(&buffer, size);
+
+    if (n == 0) {
       std::cout << "Server has closed connection" << "\n";
       connect();
-    } else {
+    } else if (n < 0) {
       std::perror("recv");
       connect();
     }
+
+    buffer[sizeof(buffer)] = '\0';
+    KeyEvent event = deserialize(buffer);
+    onKeyEvent(event);
   }
 }
 

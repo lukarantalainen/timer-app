@@ -17,6 +17,7 @@ class Server {
   int onKeyEvent(const KeyEvent& event);
   void acceptConnection();
   void check_status();
+  int send_all(const void* data, size_t size);
 
   private:
   int ret;

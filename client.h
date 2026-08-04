@@ -30,6 +30,7 @@ class Client : public QObject {
   void listen();
   void connect();
   void onKeyEvent(const KeyEvent& event);
+  int recv_all(void* data, size_t size);
 };
 
 KeyEvent deserialize(const char* buffer);

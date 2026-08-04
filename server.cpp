@@ -14,7 +14,7 @@
 #include "keyevent.h"
 
 Server::Server() {
-  connection_socket = socket(AF_UNIX, SOCK_SEQPACKET, 0);
+  connection_socket = socket(AF_UNIX, SOCK_STREAM, 0);
   if (connection_socket == -1) {
     std::perror("socket");
     std::exit(1);
@@ -82,17 +82,35 @@ SerializedKeyEvent serialize(const KeyEvent& event) {
   return s;
 }
 
+int Server::send_all(const void* data, size_t size) {
+  const char* ptr = static_cast<const char*>(data);
+  size_t sent = 0;
+
+  while (sent < size) {
+    ssize_t n = ::send(data_socket, ptr + sent, size - sent, 0);
+    if (n < 0) {
+      return n;
+    }
+    sent += n;
+  }
+  return sent;
+}
+
 int Server::onKeyEvent(const KeyEvent& event) {
-  if (connected) {
+  if (!connected) {
+    ::close(data_socket);
+    acceptConnection();
+  } else {
     auto serialized = serialize(event);
-    w = ::send(data_socket, &serialized, sizeof(serialized), 0);
+    size_t size = sizeof(serialized);
+
+    send_all(&size, sizeof(size));
+
+    w = send_all(&serialized, sizeof(serialized));
     if (w == -1) {
       std::cout << "Client disconnected" << "\n";
       connected = false;
     }
-  } else {
-    ::close(data_socket);
-    acceptConnection();
   }
   return 0;
 }
