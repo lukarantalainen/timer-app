@@ -8,9 +8,11 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <csignal>
 #include <iostream>
 
 #include "connection.h"
+#include "input.h"
 #include "keyevent.h"
 
 Server::Server() {
@@ -27,7 +29,7 @@ Server::Server() {
   name.sun_path[sizeof(name.sun_path) - 1] = '\0';
 
   ::unlink(SOCKET_NAME);
-  ret = ::bind(connection_socket, (const sockaddr*)&name, sizeof(name));
+  int ret = ::bind(connection_socket, (const sockaddr*)&name, sizeof(name));
 
   ::chmod(SOCKET_NAME, 0666);
 
@@ -44,16 +46,24 @@ Server::Server() {
 
   std::cout << "Server started" << "\n";
   acceptConnection();
+
+  m_input = new Input(6, [this](const KeyEvent& event) { onKeyEvent(event); });
+  start();
 }
 
-void Server::check_status() {
-  r = recv(data_socket, buffer, BUFFER_SIZE, 0);
-  if (r == -1) {
-    connected = true;
-    std::cout << "Client disconnected";
-    acceptConnection();
-  }
+void Server::start() {
+  m_input->start();
 }
+
+// void Server::check_status() {
+//   char buffer[BUFFER_SIZE];
+//   int r = recv(data_socket, buffer, BUFFER_SIZE, 0);
+//   if (r == -1) {
+//     connected = true;
+//     std::cout << "Client disconnected";
+//     acceptConnection();
+//   }
+// }
 
 void Server::acceptConnection() {
   while (true) {
@@ -69,6 +79,7 @@ void Server::acceptConnection() {
 }
 
 Server::~Server() {
+  delete m_input;
   close(connection_socket);
   close(data_socket);
   unlink(SOCKET_NAME);
@@ -93,38 +104,41 @@ int Server::send_all(const void* data, const size_t size) {
     }
 
     sent += n;
-    std::cout << sent << "\n";
   }
   return sent;
 }
 
 void Server::clientDisconnected() {
   std::cout << "Client disconnected" << "\n";
-  connected = false;
   ::close(data_socket);
   acceptConnection();
 }
 
-int Server::onKeyEvent(const KeyEvent& event) {
+int Server::onKeyEvent(const KeyEvent event) {
   if (!connected) {
     clientDisconnected();
   } else {
     auto serialized = serialize(event);
     size_t size = sizeof(serialized);
-    
-    w = send_all(&size, sizeof(size));
-    if (w == -1) {
-      clientDisconnected();
+
+    int w = send_all(&size, sizeof(size));
+    if (w <= 0) {
+      connected = false;
       return 0;
     }
-    
 
     w = send_all(&serialized, sizeof(serialized));
-    std::cout << w << "\n\n";
     if (w <= 0) {
-      clientDisconnected();
+      connected = false;
       return 0;
     }
   }
+  return 0;
+}
+
+int main() {
+  std::signal(SIGPIPE, SIG_IGN);
+  Server server;
+
   return 0;
 }

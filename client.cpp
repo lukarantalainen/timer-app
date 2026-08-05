@@ -88,10 +88,18 @@ int Client::recv_all(void* data, size_t size) {
 void Client::listen() {
   while (true) {
     size_t size;
-    recv_all(&size, sizeof(size));
+    int n = recv_all(&size, sizeof(size));
+
+    if (n == 0) {
+      std::cout << "Server has closed connection" << "\n";
+      connect();
+    } else if (n < 0) {
+      std::perror("recv");
+      connect();
+    }
 
 
-    int n = recv_all(&buffer, size);
+    n = recv_all(&buffer, size);
 
     if (n == 0) {
       std::cout << "Server has closed connection" << "\n";

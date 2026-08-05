@@ -12,16 +12,16 @@ class Server;
 
 class Input {
  public:
-  Input(int device, Server* server);
+  Input(int device, std::function<void(const KeyEvent&)> callback);
+  ~Input();
 
   void keyDown(const KeyEvent);
   void keyUp(const KeyEvent);
-  int log();
+  int start();
 
  private:
-  int device;
-  std::thread* m_thread;
-  Server* m_server;
+  int m_device = -1;
+  std::function<void(const KeyEvent&)> m_callback = nullptr;
 };
 
 int listInputs();

@@ -7,26 +7,26 @@
 #include <unistd.h>
 
 #include "connection.h"
+#include "input.h"
 
 class KeyEvent;
-
 class Server {
   public:
   Server();
   ~Server();
-  int onKeyEvent(const KeyEvent& event);
+  int onKeyEvent(const KeyEvent event);
   void acceptConnection();
   void check_status();
   int send_all(const void* data, const size_t size);
+  void start();
 
   private:
-  int ret;
-  int connection_socket;
-  int data_socket;
-  size_t r, w;
+  int connection_socket = -1;
+  int data_socket = -1;
   sockaddr_un name;
-  char buffer[BUFFER_SIZE];
-  bool connected;
+  bool connected = false;
+
+  Input* m_input = nullptr;
 
   void clientDisconnected();
 };

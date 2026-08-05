@@ -21,9 +21,9 @@
 #include <map>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
-#include "server.h"
 #include "table.h"
 
 constexpr char DEV_PATH[] = "/dev/input/event";
@@ -36,9 +36,11 @@ const char* codename(unsigned int type, unsigned int code) {
              : "?";
 }
 
-Input::Input(int device, Server* server) : device{device}, m_server{server} {
-  log();
+Input::Input(int device, std::function<void(const KeyEvent&)> callback)
+    : m_device{device}, m_callback{callback} {
 }
+
+Input::~Input() {}
 
 int listInputs() {
   DIR* dir = opendir("/dev/input");
@@ -68,14 +70,14 @@ int listInputs() {
 void Input::keyUp(KeyEvent) {}
 void Input::keyDown(KeyEvent) {}
 
-int Input::log() {
+int Input::start() {
   char* input_dev;
 
   char* path = new (char[strlen(DEV_PATH) + 1 + 1]);
 
   std::strcpy(path, DEV_PATH);
-  if (device) {
-    path[std::strlen(DEV_PATH)] = device + '0';
+  if (m_device) {
+    path[std::strlen(DEV_PATH)] = m_device + '0';
   } else {
     std::strcat(path, "0");
   }
@@ -130,28 +132,18 @@ int Input::log() {
       const char* n = codename(type, code);
 
       const KeyEvent event{*input_data, key};
-      m_server->onKeyEvent(event);
+      m_callback(event);
 
       std::memset(input_data, 0, input_size);
     }
   }
 
   ::close(fd.fd);
+
+  delete path;
   delete input_data;
 
   return 0;
 }
 
-
 void handleSignal(int signal) { signaled = 1; }
-
-int main() {
-  using namespace std::chrono_literals;
-
-  std::signal(SIGTERM, handleSignal);
-
-  Server server;
-  Input input(6, &server);
-
-  return 0;
-}
