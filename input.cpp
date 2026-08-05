@@ -23,11 +23,11 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <chrono>
 
 #include "table.h"
 
 constexpr char DEV_PATH[] = "/dev/input/event";
-volatile sig_atomic_t signaled = 0;
 
 const char* codename(unsigned int type, unsigned int code) {
   return (type <= EV_MAX && code <= max_size[type] && types[type] &&
@@ -100,10 +100,6 @@ int Input::start() {
   int ret;
 
   while (true) {
-    if (signaled) {
-      break;
-    }
-
     ret = poll(&fd, 1, -1);
 
     if (ret < 0) {
@@ -133,8 +129,6 @@ int Input::start() {
 
       const KeyEvent event{*input_data, key};
       m_callback(event);
-
-      std::memset(input_data, 0, input_size);
     }
   }
 
@@ -145,5 +139,3 @@ int Input::start() {
 
   return 0;
 }
-
-void handleSignal(int signal) { signaled = 1; }

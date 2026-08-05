@@ -15,8 +15,7 @@ class Server {
   Server();
   ~Server();
   int onKeyEvent(const KeyEvent event);
-  void acceptConnection();
-  void check_status();
+  void accept(int socket);
   int send_all(const void* data, const size_t size);
   void start();
 

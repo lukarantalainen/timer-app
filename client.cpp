@@ -25,8 +25,7 @@ Client::Client() {
   std::memset(&addr, 0, sizeof(addr));
 
   addr.sun_family = AF_UNIX;
-  std::strncpy(addr.sun_path, SOCKET_NAME, sizeof(addr.sun_path) - 1);
-  addr.sun_path[sizeof(addr.sun_path) - 1] = '\0';
+  std::snprintf(addr.sun_path, sizeof(addr.sun_path), "%s", SOCKET_NAME);
 
   // ret = ::connect(data_socket, (const sockaddr*)&addr, sizeof(addr));
 

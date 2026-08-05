@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 4.0)
 
 project(TimerApp)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
@@ -24,7 +24,7 @@ add_custom_target(generate_headers
   DEPENDS ${GENERATED_HEADER}
 )
 
-add_executable(Client
+add_executable(client
   main.cpp
   mainwindow.cpp
   timer.cpp
@@ -34,24 +34,24 @@ add_executable(Client
   client.cpp
 )
 
-add_dependencies(Client generate_headers)
+add_dependencies(client generate_headers)
 
-target_link_libraries(Client PRIVATE Qt6::Widgets)
+target_link_libraries(client PRIVATE Qt6::Widgets)
 
-target_include_directories(Client PRIVATE
+target_include_directories(client PRIVATE
   ${CMAKE_CURRENT_BINARY_DIR}/generated
   ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 
-add_executable(Server
+add_executable(server
   input.cpp
   server.cpp
 )
 
-add_dependencies(Server generate_headers)
+add_dependencies(server generate_headers)
 
-target_include_directories(Server PRIVATE
+target_include_directories(server PRIVATE
   ${CMAKE_CURRENT_BINARY_DIR}/generated
   ${CMAKE_CURRENT_SOURCE_DIR}/include
 )

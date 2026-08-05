@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
   std::memset(&addr, 0, sizeof(addr));
 
   addr.sun_family = AF_UNIX;
-  std::strncpy(addr.sun_path, SOCKET_NAME, sizeof(addr.sun_path) - 1);
+  std::snprintf(addr.sun_path, sizeof(addr.sun_path), "%s", SOCKET_NAME);
   addr.sun_path[sizeof(addr.sun_path) - 1] = '\0';
 
   ret = connect(data_socket, (const sockaddr*)&addr, sizeof(addr));
