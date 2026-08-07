@@ -5,7 +5,7 @@
 #include <QWidget>
 #include <QLabel>
 
-#include "input.h"
+class Input;
 
 class MainWindow : public QMainWindow {
     public:

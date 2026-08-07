@@ -3,8 +3,8 @@
 #include <QPlainTextEdit>
 #include <QWidget>
 #include <QObject>
-#include "input.h"
 
+class KeyEvent;
 class LogDisplay : public QWidget {
   Q_OBJECT
 
