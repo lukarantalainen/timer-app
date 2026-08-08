@@ -13,8 +13,8 @@
 #include "keyboard_key.h"
 #include "keyevent.h"
 
-KeyboardHeatmap::KeyboardHeatmap(KeyboardLayout layout, KeyboardSize size)
-    : m_key_layout{layout}, m_size{size} {
+KeyboardHeatmap::KeyboardHeatmap(KeyboardLayout layout, KeyboardSize size, QWidget* parent)
+    : m_key_layout{layout}, m_size{size}, QWidget(parent) {
   m_layout = new QBoxLayout(QBoxLayout::Direction::TopToBottom, this);
 
   setAutoFillBackground(true);

@@ -35,7 +35,7 @@ enum class KeyboardSize {
 class KeyboardHeatmap : public QWidget {
   Q_OBJECT
  public:
-  KeyboardHeatmap(KeyboardLayout layout, KeyboardSize size);
+  KeyboardHeatmap(KeyboardLayout layout, KeyboardSize size, QWidget* parent = nullptr);
 
  private:
   QBoxLayout* m_layout;

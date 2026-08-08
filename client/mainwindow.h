@@ -6,6 +6,9 @@
 #include <QLabel>
 
 class Input;
+class Client;
+class KeyboardHeatmap;
+class LogDisplay;
 
 class MainWindow : public QMainWindow {
     public:
@@ -15,6 +18,9 @@ class MainWindow : public QMainWindow {
     private:
     QWidget* centralWidget(MainWindow* parent);
     
-    QLabel* keyboard_label = nullptr;
+    Client* m_client = nullptr;
+    KeyboardHeatmap* m_heatmap = nullptr;
+    LogDisplay* m_log = nullptr;
     Input* input = nullptr;
+    QStatusBar* status_bar = nullptr;
 };

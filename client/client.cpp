@@ -51,6 +51,7 @@ void Client::connect() {
     ret = ::connect(data_socket, (const sockaddr*)&addr, sizeof(addr));
     if (ret == 0) {
       std::cout << "Connected" << "\n";
+      emit connectionChanged(true);
       return;
     }
     std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -91,6 +92,7 @@ void Client::listen() {
 
     if (n == 0) {
       std::cout << "Server has closed connection" << "\n";
+      emit connectionChanged(false);
       connect();
     } else if (n < 0) {
       std::perror("recv");
@@ -102,6 +104,7 @@ void Client::listen() {
 
     if (n == 0) {
       std::cout << "Server has closed connection" << "\n";
+      emit connectionChanged(false);
       connect();
     } else if (n < 0) {
       std::perror("recv");

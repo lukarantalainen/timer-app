@@ -20,6 +20,7 @@ class Client : public QObject {
  signals:
   void keyDown(const KeyEvent& event);
   void keyUp(const KeyEvent& event);
+  void connectionChanged(bool connected);
 
  private:
   int data_socket;
