@@ -16,3 +16,6 @@ and you can find the executables in the build directory
 Run `./build/server` as sudo
 
 Run `./build/client` normally
+
+# Uninstalling
+Run `./uninstall.sh` which removes the created socket from your system
