@@ -17,6 +17,11 @@
 
 Client::Client() { m_thread = std::thread(&Client::start, this); }
 
+Client::~Client() { 
+  m_thread.join();
+  ::close(data_socket); 
+}
+
 void Client::start() {
   std::memset(&addr, 0, sizeof(addr));
 
@@ -28,7 +33,6 @@ void Client::start() {
 }
 
 void Client::connect() {
-  int ret;
   int count{1};
   ::close(data_socket);
 
@@ -38,7 +42,7 @@ void Client::connect() {
   }
 
   while (true) {
-    ret = ::connect(data_socket, (const sockaddr*)&addr, sizeof(addr));
+    int ret = ::connect(data_socket, (const sockaddr*)&addr, sizeof(addr));
     if (ret == 0) {
       std::cout << "Connected" << "\n";
       emit connectionChanged(true);
@@ -46,7 +50,7 @@ void Client::connect() {
     }
     emit connectionChanged(false);
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    std::cout << "Trying to connect: " << count << "\n";
+    emit connectionCountdown(count);
     ++count;
   }
 }
@@ -67,6 +71,10 @@ int Client::recv_all(void* data, size_t size) {
   while (rv < size) {
     int n = ::recv(data_socket, ptr, size - rv, 0);
 
+    if (n == 0) {
+      return 0;
+    }
+
     if (n == -1) {
       perror("recv");
       return -1;
@@ -74,21 +82,23 @@ int Client::recv_all(void* data, size_t size) {
     rv += n;
   }
 
-  char response = 'A';
-  ::send(data_socket, &response, 1, 0);
-
   return rv;
 }
 
 void Client::listen() {
   while (true) {
-    pollfd fd;
-    fd.fd = data_socket;
-    fd.events = POLLIN;
-    int ret = ::poll(&fd, 1, 5000);
+    pollfd pfd;
+    pfd.fd = data_socket;
+    pfd.events = POLLIN;
+    int ret = ::poll(&pfd, 1, 5000);
 
-    if (ret <= 0) {
+    if (ret < 0) {
+      std::cout << "Timeout" << "\n";
+      continue;
+    } else if (ret < 0) {
+      perror("poll");
       emit connectionChanged(false);
+      continue;
     }
 
     size_t size;
@@ -98,9 +108,18 @@ void Client::listen() {
       std::cout << "Server has closed connection" << "\n";
       emit connectionChanged(false);
       connect();
+      continue;
     } else if (n < 0) {
       std::perror("recv");
       connect();
+      continue;
+    }
+
+    char buffer[BUFFER_SIZE];
+
+    if (size >= BUFFER_SIZE) {
+      std::cerr << "Invalid message size" << "\n";
+      continue;
     }
 
     n = recv_all(&buffer, size);
@@ -109,21 +128,17 @@ void Client::listen() {
       std::cout << "Server has closed connection" << "\n";
       emit connectionChanged(false);
       connect();
+      continue;
     } else if (n < 0) {
       std::perror("recv");
       connect();
+      continue;
     }
 
-    buffer[sizeof(buffer)] = '\0';
+    buffer[sizeof(buffer) - 1] = '\0';
     KeyEvent event = deserialize(buffer);
     onKeyEvent(event);
   }
-}
-
-Client::~Client() { ::close(data_socket); }
-
-bool isConnectionAlive(int sockfd) {
-  return true;
 }
 
 KeyEvent deserialize(const char* buffer) {

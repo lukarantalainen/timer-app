@@ -19,24 +19,25 @@
 volatile sig_atomic_t signaled = 0;
 
 Server::Server() {
-  listening_socket = socket(AF_UNIX, SOCK_STREAM, 0);
+  int ret;
+  listening_socket = ::socket(AF_UNIX, SOCK_STREAM, 0);
   if (listening_socket == -1) {
     std::perror("socket");
     std::exit(1);
   }
 
-  std::memset(&name, 0, sizeof(name));
+  std::memset(&addr, 0, sizeof(addr));
 
-  name.sun_family = AF_UNIX;
-  int n = std::snprintf(name.sun_path, sizeof(name.sun_path), "%s", SOCKET_NAME);
+  addr.sun_family = AF_UNIX;
+  int n = std::snprintf(addr.sun_path, sizeof(addr.sun_path), "%s", SOCKET_NAME);
 
-  if (n < 0 || static_cast<size_t>(n) >= sizeof(name.sun_path)) {
+  if (n < 0 || static_cast<size_t>(n) >= sizeof(addr.sun_path)) {
     std::cout << "Path too long" << "\n";
     std::exit(1);
   }
 
   ::unlink(SOCKET_NAME);
-  int ret = ::bind(listening_socket, reinterpret_cast<const sockaddr*>(&name), sizeof(name));
+  ret = ::bind(listening_socket, reinterpret_cast<const sockaddr*>(&addr), sizeof(addr));
 
   if (ret == -1) {
     std::perror("bind");
@@ -54,14 +55,18 @@ Server::Server() {
   accept(listening_socket);
 
   m_input = new Input(6, [this](const KeyEvent& event) { onKeyEvent(event); });
-  start();
-}
-
-void Server::start() {
   m_input->start();
 }
 
+Server::~Server() {
+  delete m_input;
+  ::close(listening_socket);
+  ::close(data_socket);
+  ::unlink(SOCKET_NAME);
+}
+
 void Server::accept(int socket) {
+  ::close(data_socket);
   while (true) {
     std::cout << "Waiting for connection" << "\n";
     data_socket = ::accept(socket, NULL, NULL);
@@ -75,20 +80,6 @@ void Server::accept(int socket) {
   }
 }
 
-Server::~Server() {
-  delete m_input;
-  close(listening_socket);
-  close(data_socket);
-  unlink(SOCKET_NAME);
-}
-
-SerializedKeyEvent serialize(const KeyEvent& event) {
-  SerializedKeyEvent s;
-  s.input_data = event.input_data;
-  int n = std::snprintf(s.key_name, sizeof(s.key_name), "%s", event.key_name.c_str());
-  return s;
-}
-
 int Server::send_all(const void* data, const size_t size) {
   const char* ptr = static_cast<const char*>(data);
   size_t sent = 0;
@@ -98,29 +89,22 @@ int Server::send_all(const void* data, const size_t size) {
     if (n <= 0) {
       return n;
     }
-
     sent += n;
   }
 
-  char ack_response{};
-  int reply = recv(data_socket, &ack_response, 1, 0);
-
-  if (reply == 1 && ack_response == 'A') {
-    return sent;
-  }
-
-  return -1;
+  return sent;
 }
 
-void Server::clientDisconnected() {
-  std::cout << "Client disconnected" << "\n";
-  ::close(data_socket);
-  accept(listening_socket);
+SerializedKeyEvent serialize(const KeyEvent& event) {
+  SerializedKeyEvent s;
+  s.input_data = event.input_data;
+  int n = std::snprintf(s.key_name, sizeof(s.key_name), "%s", event.key_name.c_str());
+  return s;
 }
 
 int Server::onKeyEvent(const KeyEvent event) {
   if (!connected) {
-    clientDisconnected();
+    accept(listening_socket);
   } else {
     auto serialized = serialize(event);
     size_t size = sizeof(serialized);

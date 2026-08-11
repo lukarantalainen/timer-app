@@ -7,7 +7,6 @@
 #include <thread>
 
 #include "connection.h"
-
 #include "keyevent.h"
 
 class Client : public QObject {
@@ -15,17 +14,16 @@ class Client : public QObject {
  public:
   Client();
   ~Client();
-  
 
  signals:
   void keyDown(const KeyEvent& event);
   void keyUp(const KeyEvent& event);
   void connectionChanged(bool connected);
+  void connectionCountdown(int value);
 
  private:
-  int data_socket;
+  int data_socket = -1;
   sockaddr_un addr;
-  char buffer[BUFFER_SIZE];
   std::thread m_thread;
 
   void start();

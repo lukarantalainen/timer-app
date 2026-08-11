@@ -44,6 +44,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 
   QObject::connect(m_client, &Client::connectionChanged, status_bar,
                    &StatusBar::connectionChanged);
+  QObject::connect(m_client, &Client::connectionCountdown, status_bar, &StatusBar::connectionCountdown);
 
   QObject::connect(m_client, &Client::keyDown, m_heatmap,
                    &KeyboardHeatmap::keyDown);

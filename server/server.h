@@ -17,15 +17,12 @@ class Server {
   int onKeyEvent(const KeyEvent event);
   void accept(int socket);
   int send_all(const void* data, const size_t size);
-  void start();
 
   private:
   int listening_socket = -1;
   int data_socket = -1;
-  sockaddr_un name;
+  sockaddr_un addr;
   bool connected = false;
 
   Input* m_input = nullptr;
-
-  void clientDisconnected();
 };
