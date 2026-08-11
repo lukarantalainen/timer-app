@@ -5,10 +5,10 @@
 #include <QWidget>
 #include <QLabel>
 
-class Input;
-class Client;
-class KeyboardHeatmap;
+class StatusBar;
+class Keyboard;
 class LogDisplay;
+class Timer;
 
 class MainWindow : public QMainWindow {
     public:
@@ -16,11 +16,11 @@ class MainWindow : public QMainWindow {
     virtual ~MainWindow() = default;
 
     private:
-    QWidget* centralWidget(MainWindow* parent);
-    
-    Client* m_client = nullptr;
-    KeyboardHeatmap* m_heatmap = nullptr;
+    QWidget* createCentralWidget();
+
+    QWidget* m_central_widget = nullptr;
+    StatusBar* m_status_bar = nullptr;
     LogDisplay* m_log = nullptr;
-    Input* input = nullptr;
-    QStatusBar* status_bar = nullptr;
+    Keyboard* m_keyboard = nullptr;
+    Timer* m_timer = nullptr;
 };

@@ -12,23 +12,25 @@
 class Client : public QObject {
   Q_OBJECT
  public:
-  Client();
-  ~Client();
+ ~Client();
+ 
+ void start();
+ void stop();
 
  signals:
   void keyDown(const KeyEvent& event);
   void keyUp(const KeyEvent& event);
   void connectionChanged(bool connected);
-  void connectionCountdown(int value);
+  void connectionCountdown(double value);
 
  private:
   int data_socket = -1;
   sockaddr_un addr;
   std::thread m_thread;
 
-  void start();
+  void initiate();
   void listen();
-  void connect();
+  int connect();
   void onKeyEvent(const KeyEvent& event);
   int recv_all(void* data, size_t size);
 };

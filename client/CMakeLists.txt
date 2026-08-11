@@ -7,6 +7,7 @@ add_executable(client
   keyboard_heatmap.cpp
   client.cpp
   statusbar.cpp
+  keyboard.cpp
 )
 
 

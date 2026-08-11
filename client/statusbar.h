@@ -13,7 +13,7 @@ class StatusBar : public QStatusBar {
 
   public slots:
   void connectionChanged(bool connected);
-  void connectionCountdown(int value);
+  void connectionCountdown(double value);
 
   private:
   QLabel* status_label = nullptr;

@@ -11,55 +11,61 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <atomic>
 
 #include "connection.h"
 #include "keyevent.h"
 
-Client::Client() { m_thread = std::thread(&Client::start, this); }
+std::atomic_bool signaled = false;
 
-Client::~Client() { 
+Client::~Client() {
   m_thread.join();
-  ::close(data_socket); 
+  ::close(data_socket);
 }
 
-void Client::start() {
+void Client::start() { m_thread = std::thread(&Client::initiate, this); }
+
+void Client::stop() {
+  signaled = true;
+}
+
+void Client::initiate() {
   std::memset(&addr, 0, sizeof(addr));
 
   addr.sun_family = AF_UNIX;
   std::snprintf(addr.sun_path, sizeof(addr.sun_path), "%s", SOCKET_NAME);
 
-  connect();
+  int ret = connect();
+
+  if (ret == -1) {
+    std::cerr << "Failed to connect" << "\n";
+  }
+
   listen();
 }
 
-void Client::connect() {
-  int count{1};
+int Client::connect() {
   ::close(data_socket);
 
   data_socket = socket(AF_UNIX, SOCK_STREAM, 0);
   if (data_socket == -1) {
     std::perror("socket");
+    return -1;
   }
 
+  double count{1.0};
   while (true) {
     int ret = ::connect(data_socket, (const sockaddr*)&addr, sizeof(addr));
     if (ret == 0) {
       std::cout << "Connected" << "\n";
       emit connectionChanged(true);
-      return;
+      return 0;
     }
     emit connectionChanged(false);
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    emit connectionCountdown(count);
-    ++count;
-  }
-}
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-void Client::onKeyEvent(const KeyEvent& event) {
-  if (event.input_data.value == 0) {
-    emit(keyUp(event));
-  } else if (event.input_data.value == 1 || event.input_data.value == 2) {
-    emit(keyDown(event));
+    emit connectionCountdown(count);
+    count += 0.1;
   }
 }
 
@@ -87,30 +93,25 @@ int Client::recv_all(void* data, size_t size) {
 
 void Client::listen() {
   while (true) {
-    pollfd pfd;
-    pfd.fd = data_socket;
-    pfd.events = POLLIN;
-    int ret = ::poll(&pfd, 1, 5000);
+    if (signaled) return;
 
-    if (ret < 0) {
-      std::cout << "Timeout" << "\n";
+    pollfd pfd{data_socket, POLLIN};
+    int ret = ::poll(&pfd, 1, 100); 
+
+    if (ret == 0) {      
       continue;
-    } else if (ret < 0) {
-      perror("poll");
-      emit connectionChanged(false);
+    } else if (ret == -1) {
+      std::perror("poll");
       continue;
     }
 
+    
     size_t size;
     int n = recv_all(&size, sizeof(size));
 
-    if (n == 0) {
-      std::cout << "Server has closed connection" << "\n";
+    if (n <= 0) {
+      std::cout << "Server down" << "\n";
       emit connectionChanged(false);
-      connect();
-      continue;
-    } else if (n < 0) {
-      std::perror("recv");
       connect();
       continue;
     }
@@ -124,19 +125,15 @@ void Client::listen() {
 
     n = recv_all(&buffer, size);
 
-    if (n == 0) {
+    if (n <= 0) {
       std::cout << "Server has closed connection" << "\n";
       emit connectionChanged(false);
       connect();
       continue;
-    } else if (n < 0) {
-      std::perror("recv");
-      connect();
-      continue;
     }
 
-    buffer[sizeof(buffer) - 1] = '\0';
-    KeyEvent event = deserialize(buffer);
+    buffer[size] = '\0';
+    auto event = deserialize(buffer);
     onKeyEvent(event);
   }
 }
@@ -149,9 +146,15 @@ KeyEvent deserialize(const char* buffer) {
   std::memcpy(&event.input_data, p, sizeof(input_event));
   p += sizeof(input_event);
 
-  char str_buff[MAX_KEY_SIZE]{};
-  std::strcpy(str_buff, p);
-  event.key_name = std::string(str_buff);
+  event.key_name = std::string(p);
 
   return event;
+}
+
+void Client::onKeyEvent(const KeyEvent& event) {
+  if (event.input_data.value == 0) {
+    emit(keyUp(event));
+  } else if (event.input_data.value == 1 || event.input_data.value == 2) {
+    emit(keyDown(event));
+  }
 }

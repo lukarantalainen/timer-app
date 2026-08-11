@@ -13,8 +13,7 @@
 #include <QWidget>
 #include <iostream>
 
-#include "client.h"
-#include "keyboard_heatmap.h"
+#include "keyboard.h"
 #include "logdisplay.h"
 #include "statusbar.h"
 #include "timer.h"
@@ -27,46 +26,29 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
   setMinimumSize(100, 100);
   resize(600, 500);
 
-  m_client = new Client();
+  m_timer = new Timer(this);
+
+  m_status_bar = new StatusBar(this);
+  setStatusBar(m_status_bar);
 
   m_log = new LogDisplay(this);
-  m_log->show();
+  m_keyboard = new Keyboard(m_status_bar, m_log, this);
 
-  m_heatmap = new KeyboardHeatmap(KeyboardLayout::QWERTY,
-                                  KeyboardSize::SizeTKL80, this);
-  m_heatmap->show();
-
-  auto central_widget{centralWidget(this)};
-  setCentralWidget(central_widget);
-
-  StatusBar* status_bar = new StatusBar(this);
-  setStatusBar(status_bar);
-
-  QObject::connect(m_client, &Client::connectionChanged, status_bar,
-                   &StatusBar::connectionChanged);
-  QObject::connect(m_client, &Client::connectionCountdown, status_bar, &StatusBar::connectionCountdown);
-
-  QObject::connect(m_client, &Client::keyDown, m_heatmap,
-                   &KeyboardHeatmap::keyDown);
-  QObject::connect(m_client, &Client::keyUp, m_heatmap,
-                   &KeyboardHeatmap::keyUp);
-
-  QObject::connect(m_client, &Client::keyDown, m_log, &LogDisplay::append);
-  QObject::connect(m_client, &Client::keyUp, m_log, &LogDisplay::append);
+  m_central_widget = createCentralWidget();
+  setCentralWidget(m_central_widget);
 }
 
-QWidget* MainWindow::centralWidget(MainWindow* parent) {
+QWidget* MainWindow::createCentralWidget() {
   auto central_widget = new QWidget(this);
 
   auto tabwidget = new QTabWidget(central_widget);
 
-  auto timer = new Timer(this);
+  auto layout = new QGridLayout(central_widget);
+  layout->addWidget(tabwidget);
 
-  tabwidget->addTab(m_heatmap, "Keyboard");
-  tabwidget->addTab(timer, "Timer");
+  tabwidget->addTab(m_keyboard, "Keyboard");
+  tabwidget->addTab(m_timer, "Timer");
   tabwidget->addTab(m_log, "Log");
-  tabwidget->show();
 
-  central_widget->show();
   return central_widget;
 }
