@@ -1,22 +1,22 @@
 #include "statusbar.h"
 #include <QStatusBar>
+#include <QLabel>
 
 StatusBar::StatusBar(QWidget* parent) : QStatusBar(parent) {
 
-  //showMessage("hi");
+  status_label = new QLabel();
+  status_label->setText("test");
+  status_label->show();
+  addPermanentWidget(status_label, 1);
 
 }
 
 void StatusBar::connectionChanged(bool connected) {
-  qDebug() << "hello" << "\n";
+  if (!status_label) return;
   if (connected) {
-    m_text = "Connected";
+    status_label->setText("Connected");
   } else {
-    m_text = "Disconnected";
+    status_label->setText("Disconnected");
   }
-  if (this) {
-    showMessage("hello");
-  }
-  
 }
 

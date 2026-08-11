@@ -1,5 +1,7 @@
 #!/bin/bash
-sudo rm /tmp/loggertest.socket
-if [ ! -f /tmp/loggertest.socket ]; then
-    echo "File not found!"
+
+if sudo rm /tmp/loggertest.socket; then
+    echo "Socket removed successfully."
+else 
+    echo "Failed to remove socket."
 fi

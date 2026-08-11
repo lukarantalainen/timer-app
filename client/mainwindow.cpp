@@ -8,8 +8,6 @@
 #include <QLabel>
 #include <QMainWindow>
 #include <QObject>
-#include <QPalette>
-#include <QStatusBar>
 #include <QTabWidget>
 #include <QTimer>
 #include <QWidget>
@@ -18,8 +16,8 @@
 #include "client.h"
 #include "keyboard_heatmap.h"
 #include "logdisplay.h"
-#include "timer.h"
 #include "statusbar.h"
+#include "timer.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
   setWindowTitle("Timer app");
@@ -34,8 +32,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
   m_log = new LogDisplay(this);
   m_log->show();
 
-  m_heatmap =
-      new KeyboardHeatmap(KeyboardLayout::QWERTY, KeyboardSize::SizeTKL80, this);
+  m_heatmap = new KeyboardHeatmap(KeyboardLayout::QWERTY,
+                                  KeyboardSize::SizeTKL80, this);
   m_heatmap->show();
 
   auto central_widget{centralWidget(this)};
@@ -44,7 +42,16 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
   StatusBar* status_bar = new StatusBar(this);
   setStatusBar(status_bar);
 
-  QObject::connect(m_client, &Client::connectionChanged, status_bar, &StatusBar::connectionChanged);
+  QObject::connect(m_client, &Client::connectionChanged, status_bar,
+                   &StatusBar::connectionChanged);
+
+  QObject::connect(m_client, &Client::keyDown, m_heatmap,
+                   &KeyboardHeatmap::keyDown);
+  QObject::connect(m_client, &Client::keyUp, m_heatmap,
+                   &KeyboardHeatmap::keyUp);
+
+  QObject::connect(m_client, &Client::keyDown, m_log, &LogDisplay::append);
+  QObject::connect(m_client, &Client::keyUp, m_log, &LogDisplay::append);
 }
 
 QWidget* MainWindow::centralWidget(MainWindow* parent) {
@@ -54,19 +61,10 @@ QWidget* MainWindow::centralWidget(MainWindow* parent) {
 
   auto timer = new Timer(this);
 
-  
-
   tabwidget->addTab(m_heatmap, "Keyboard");
   tabwidget->addTab(timer, "Timer");
   tabwidget->addTab(m_log, "Log");
   tabwidget->show();
-
-  QObject::connect(m_client, &Client::keyDown, m_heatmap,
-                   &KeyboardHeatmap::keyDown);
-  QObject::connect(m_client, &Client::keyUp, m_heatmap, &KeyboardHeatmap::keyUp);
-
-  QObject::connect(m_client, &Client::keyDown, m_log, &LogDisplay::append);
-  QObject::connect(m_client, &Client::keyUp, m_log, &LogDisplay::append);
 
   central_widget->show();
   return central_widget;

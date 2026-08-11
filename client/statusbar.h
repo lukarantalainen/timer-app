@@ -3,7 +3,7 @@
 #include <QStatusBar>
 #include <QObject>
 
-
+class QLabel;
 class StatusBar : public QStatusBar {
   Q_OBJECT
 
@@ -15,5 +15,5 @@ class StatusBar : public QStatusBar {
   void connectionChanged(bool connected);
 
   private:
-  QString m_text = "";
+  QLabel* status_label = nullptr;
 };

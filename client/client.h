@@ -28,6 +28,7 @@ class Client : public QObject {
   char buffer[BUFFER_SIZE];
   std::thread m_thread;
 
+  void start();
   void listen();
   void connect();
   void onKeyEvent(const KeyEvent& event);

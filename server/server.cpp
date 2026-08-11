@@ -19,8 +19,8 @@
 volatile sig_atomic_t signaled = 0;
 
 Server::Server() {
-  connection_socket = socket(AF_UNIX, SOCK_STREAM, 0);
-  if (connection_socket == -1) {
+  listening_socket = socket(AF_UNIX, SOCK_STREAM, 0);
+  if (listening_socket == -1) {
     std::perror("socket");
     std::exit(1);
   }
@@ -36,7 +36,7 @@ Server::Server() {
   }
 
   ::unlink(SOCKET_NAME);
-  int ret = ::bind(connection_socket, reinterpret_cast<const sockaddr*>(&name), sizeof(name));
+  int ret = ::bind(listening_socket, reinterpret_cast<const sockaddr*>(&name), sizeof(name));
 
   if (ret == -1) {
     std::perror("bind");
@@ -44,14 +44,14 @@ Server::Server() {
   }
   ::chmod(SOCKET_NAME, 0666);
   
-  ret = ::listen(connection_socket, 20);
+  ret = ::listen(listening_socket, 20);
   if (ret == -1) {
     std::perror("listen");
     exit(1);
   }
 
   std::cout << "Server started" << "\n";
-  accept(connection_socket);
+  accept(listening_socket);
 
   m_input = new Input(6, [this](const KeyEvent& event) { onKeyEvent(event); });
   start();
@@ -77,7 +77,7 @@ void Server::accept(int socket) {
 
 Server::~Server() {
   delete m_input;
-  close(connection_socket);
+  close(listening_socket);
   close(data_socket);
   unlink(SOCKET_NAME);
 }
@@ -101,13 +101,21 @@ int Server::send_all(const void* data, const size_t size) {
 
     sent += n;
   }
-  return sent;
+
+  char ack_response{};
+  int reply = recv(data_socket, &ack_response, 1, 0);
+
+  if (reply == 1 && ack_response == 'A') {
+    return sent;
+  }
+
+  return -1;
 }
 
 void Server::clientDisconnected() {
   std::cout << "Client disconnected" << "\n";
   ::close(data_socket);
-  accept(connection_socket);
+  accept(listening_socket);
 }
 
 int Server::onKeyEvent(const KeyEvent event) {

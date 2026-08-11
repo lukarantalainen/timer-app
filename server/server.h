@@ -20,7 +20,7 @@ class Server {
   void start();
 
   private:
-  int connection_socket = -1;
+  int listening_socket = -1;
   int data_socket = -1;
   sockaddr_un name;
   bool connected = false;

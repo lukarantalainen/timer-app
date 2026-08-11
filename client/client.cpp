@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
+#include <poll.h>
 
 #include <QApplication>
 #include <csignal>
@@ -14,27 +15,16 @@
 #include "connection.h"
 #include "keyevent.h"
 
-Client::Client() {
-  int ret;
+Client::Client() { m_thread = std::thread(&Client::start, this); }
 
-  data_socket = socket(AF_UNIX, SOCK_STREAM, 0);
-  if (data_socket == -1) {
-    std::perror("socket");
-  }
-
+void Client::start() {
   std::memset(&addr, 0, sizeof(addr));
 
   addr.sun_family = AF_UNIX;
   std::snprintf(addr.sun_path, sizeof(addr.sun_path), "%s", SOCKET_NAME);
 
-  // ret = ::connect(data_socket, (const sockaddr*)&addr, sizeof(addr));
-
-  // if (ret == -1) {
-  //   fprintf(stderr, "The server is down.\n");
-  // }
   connect();
-
-  m_thread = std::thread(&Client::listen, this);
+  listen();
 }
 
 void Client::connect() {
@@ -54,6 +44,7 @@ void Client::connect() {
       emit connectionChanged(true);
       return;
     }
+    emit connectionChanged(false);
     std::this_thread::sleep_for(std::chrono::seconds(1));
     std::cout << "Trying to connect: " << count << "\n";
     ++count;
@@ -82,11 +73,24 @@ int Client::recv_all(void* data, size_t size) {
     }
     rv += n;
   }
+
+  char response = 'A';
+  ::send(data_socket, &response, 1, 0);
+
   return rv;
 }
 
 void Client::listen() {
   while (true) {
+    pollfd fd;
+    fd.fd = data_socket;
+    fd.events = POLLIN;
+    int ret = ::poll(&fd, 1, 5000);
+
+    if (ret <= 0) {
+      emit connectionChanged(false);
+    }
+
     size_t size;
     int n = recv_all(&size, sizeof(size));
 
@@ -98,7 +102,6 @@ void Client::listen() {
       std::perror("recv");
       connect();
     }
-
 
     n = recv_all(&buffer, size);
 
@@ -118,6 +121,10 @@ void Client::listen() {
 }
 
 Client::~Client() { ::close(data_socket); }
+
+bool isConnectionAlive(int sockfd) {
+  return true;
+}
 
 KeyEvent deserialize(const char* buffer) {
   KeyEvent event;

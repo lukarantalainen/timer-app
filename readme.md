@@ -1,7 +1,7 @@
 # Requirements
 - Qt6
 - CMake >=4.0
-- C++23
+- C++23 
 
 # Building
 After installing everything just do 
@@ -13,9 +13,9 @@ After installing everything just do
 and you can find the executables in the build directory
 
 # Running
-Run `./build/server` as sudo
+Run `./build/server/server` as sudo
 
-Run `./build/client` normally
+Run `./build/client/client` normally
 
 # Uninstalling
 Run `./uninstall.sh` which removes the created socket from your system
