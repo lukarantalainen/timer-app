@@ -1,4 +1,6 @@
-add_executable(client
+set(CMAKE_AUTORCC ON)
+
+qt_add_executable(client
   main.cpp
   mainwindow.cpp
   timer.cpp
@@ -8,12 +10,13 @@ add_executable(client
   client.cpp
   statusbar.cpp
   keyboard.cpp
+  application.qrc
 )
 
 
 add_dependencies(client generate_headers)
 
-target_link_libraries(client PRIVATE Qt6::Widgets Qt6::Network)
+target_link_libraries(client PRIVATE Qt6::Widgets)
 
 target_include_directories(client PRIVATE
   ${CMAKE_BINARY_DIR}/generated

@@ -7,14 +7,14 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QMainWindow>
+#include <QMenu>
+#include <QMessageBox>
 #include <QObject>
+#include <QSharedMemory>
+#include <QSystemTrayIcon>
 #include <QTabWidget>
 #include <QTimer>
 #include <QWidget>
-#include <QSystemTrayIcon>
-#include <QMenu>
-#include <QSharedMemory>
-#include <QMessageBox>
 
 #include "keyboard.h"
 #include "logdisplay.h"
@@ -42,7 +42,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 
 QSystemTrayIcon* MainWindow::createSystemTrayIcon() {
   QSystemTrayIcon* tray_icon = new QSystemTrayIcon(this);
-  QIcon tray_icon_img("trayicon.png");
+  QIcon tray_icon_img(":/images/trayicon.png");
   tray_icon->setIcon(tray_icon_img);
   tray_icon->show();
 
@@ -51,13 +51,14 @@ QSystemTrayIcon* MainWindow::createSystemTrayIcon() {
   quit->setText("Quit");
   quit->setIcon(QIcon::fromTheme("gtk-quit"));
 
-  QObject::connect(quit, &QAction::triggered, this, &QApplication::quit);
+  QObject::connect(quit, &QAction::triggered, this, &QApplication::exit);
 
   context_menu->addAction(quit);
 
   tray_icon->setContextMenu(context_menu);
 
-  QObject::connect(tray_icon, &QSystemTrayIcon::activated, this, [this](){show();});
+  QObject::connect(tray_icon, &QSystemTrayIcon::activated, this,
+                   [this]() { show(); });
   return tray_icon;
 }
 

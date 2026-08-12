@@ -55,6 +55,7 @@ int Client::connect() {
 
   double count{1.0};
   while (true) {
+    if (signaled) return 0;
     int ret = ::connect(data_socket, (const sockaddr*)&addr, sizeof(addr));
     if (ret == 0) {
       std::cout << "Connected" << "\n";
