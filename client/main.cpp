@@ -1,22 +1,26 @@
-#include <iostream>
-#include "timer.h"
-
 #include <QApplication>
-#include <QWidget>
-#include "mainwindow.h"
 #include <QMainWindow>
-#include <QMenuBar>
-#include <QRadioButton>
+#include <QMessageBox>
+#include <QLocalServer>
+#include <QLocalSocket>
 
+#include "mainwindow.h"
 
+void handleConnection() {
 
-int main(int argc, char *argv[])
-{
-    QApplication app(argc, argv);
-
-    MainWindow mainwindow;
-    mainwindow.show();
-
-    return app.exec();
 }
-    
+
+int main(int argc, char* argv[]) {
+  QApplication app(argc, argv);
+  QLocalServer server;
+
+  if (!server.listen("activitytracker")) {
+    QLocalSocket* socket = new QLocalSocket();
+    socket->connectToServer("activitytracker");
+  }
+
+  MainWindow mainwindow;
+  mainwindow.show();
+
+  return app.exec();
+}

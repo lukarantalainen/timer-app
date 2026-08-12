@@ -82,7 +82,7 @@ int Client::recv_all(void* data, size_t size) {
     }
 
     if (n == -1) {
-      perror("recv");
+      std::perror("recv");
       return -1;
     }
     rv += n;

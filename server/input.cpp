@@ -45,7 +45,7 @@ Input::~Input() {}
 int listInputs() {
   DIR* dir = opendir("/dev/input");
   if (!dir) {
-    perror("Failed to open directory");
+    std::perror("Failed to open directory");
     return 1;
   }
 

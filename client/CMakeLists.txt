@@ -13,7 +13,7 @@ add_executable(client
 
 add_dependencies(client generate_headers)
 
-target_link_libraries(client PRIVATE Qt6::Widgets)
+target_link_libraries(client PRIVATE Qt6::Widgets Qt6::Network)
 
 target_include_directories(client PRIVATE
   ${CMAKE_BINARY_DIR}/generated
