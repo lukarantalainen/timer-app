@@ -9,13 +9,13 @@
 int main(int argc, char* argv[]) {
   QApplication app(argc, argv);
 
-  const QString unique_key = "d642e958b7956b55478269f35e14b119";
+  const QString sock = "activitytracker-instance";
 
-  QSharedMemory shared_memory(unique_key);
+  QSharedMemory shared_memory(sock);
 
   if (!shared_memory.create(1)) {
     QLocalSocket socket;
-    socket.connectToServer(unique_key);
+    socket.connectToServer(sock);
 
     if (socket.waitForConnected(1000)) {
       socket.write("ACTIVATE");
@@ -39,15 +39,19 @@ int main(int argc, char* argv[]) {
   mainwindow.show();
 
   QLocalServer server;
-  QLocalServer::removeServer(unique_key);
-  if (server.listen(unique_key)) {
+  QLocalServer::removeServer(sock);
+  if (server.listen(sock)) {
     QObject::connect(&server, &QLocalServer::newConnection, [&]() {
       QLocalSocket* client_socket = server.nextPendingConnection();
       QObject::connect(client_socket, &QLocalSocket::readyRead, [&, client_socket]() {
         QByteArray data = client_socket->readAll();
         if (data == "ACTIVATE") {
           mainwindow.print("Another instance launched");
-          mainwindow.show();
+          if (mainwindow.isVisible()) {
+            mainwindow.hide();
+            mainwindow.show();
+          }
+          else mainwindow.show();
         }
         client_socket->deleteLater();
       });

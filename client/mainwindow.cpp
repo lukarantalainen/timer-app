@@ -57,14 +57,16 @@ QSystemTrayIcon* MainWindow::createSystemTrayIcon() {
 
   tray_icon->setContextMenu(context_menu);
 
-  QObject::connect(tray_icon, &QSystemTrayIcon::activated, this,
-                   [this]() { show(); });
+  QObject::connect(tray_icon, &QSystemTrayIcon::activated, this, [this]() {
+    if (isVisible())
+      hide();
+    else
+      show();
+  });
   return tray_icon;
 }
 
-void MainWindow::print(const QString text) {
-  m_log->print(text);
-}
+void MainWindow::print(const QString text) { m_log->print(text); }
 
 QWidget* MainWindow::createCentralWidget() {
   auto central_widget = new QWidget(this);
