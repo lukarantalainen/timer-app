@@ -62,6 +62,10 @@ QSystemTrayIcon* MainWindow::createSystemTrayIcon() {
   return tray_icon;
 }
 
+void MainWindow::print(const QString text) {
+  m_log->print(text);
+}
+
 QWidget* MainWindow::createCentralWidget() {
   auto central_widget = new QWidget(this);
 

@@ -13,6 +13,7 @@ class MainWindow : public QMainWindow {
  public:
   MainWindow(QWidget* parent = nullptr);
   virtual ~MainWindow() = default;
+  void print(const QString text);
 
  private:
   QWidget* createCentralWidget();
