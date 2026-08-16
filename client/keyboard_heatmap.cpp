@@ -68,7 +68,24 @@ void KeyboardHeatmap::keyUp(const KeyEvent& event) {
 }
 
 void KeyboardHeatmap::createKeys() {
+  function_row = {
+      new KeyboardKey(this, Qt::Key_Escape),
+      new KeyboardKey(this, Qt::Key_F1),
+  new KeyboardKey(this, Qt::Key_F2),
+  new KeyboardKey(this, Qt::Key_F3),
+  new KeyboardKey(this, Qt::Key_F4),
+  new KeyboardKey(this, Qt::Key_F5),
+  new KeyboardKey(this, Qt::Key_F6),
+  new KeyboardKey(this, Qt::Key_F7),
+  new KeyboardKey(this, Qt::Key_F8),
+  new KeyboardKey(this, Qt::Key_F9),
+  new KeyboardKey(this, Qt::Key_F10),
+  new KeyboardKey(this, Qt::Key_F11),
+  new KeyboardKey(this, Qt::Key_F12),
+  };
+
   number_row = {
+    new KeyboardKey(this, Qt::Key_AsciiTilde),
       new KeyboardKey(this, Qt::Key_1), new KeyboardKey(this, Qt::Key_2),
       new KeyboardKey(this, Qt::Key_3), new KeyboardKey(this, Qt::Key_4),
       new KeyboardKey(this, Qt::Key_5), new KeyboardKey(this, Qt::Key_6),
@@ -77,6 +94,7 @@ void KeyboardHeatmap::createKeys() {
   };
 
   top_row = {
+    new KeyboardKey(this, Qt::Key_Tab),
       new KeyboardKey(this, Qt::Key_Q), new KeyboardKey(this, Qt::Key_W),
       new KeyboardKey(this, Qt::Key_E), new KeyboardKey(this, Qt::Key_R),
       new KeyboardKey(this, Qt::Key_T), new KeyboardKey(this, Qt::Key_Y),
@@ -85,6 +103,7 @@ void KeyboardHeatmap::createKeys() {
   };
 
   home_row = {
+      new KeyboardKey(this, Qt::Key_CapsLock),
       new KeyboardKey(this, Qt::Key_A), new KeyboardKey(this, Qt::Key_S),
       new KeyboardKey(this, Qt::Key_D), new KeyboardKey(this, Qt::Key_F),
       new KeyboardKey(this, Qt::Key_G), new KeyboardKey(this, Qt::Key_H),
@@ -93,11 +112,24 @@ void KeyboardHeatmap::createKeys() {
   };
 
   bottom_row = {
+    new KeyboardKey(this, Qt::Key_Shift),
       new KeyboardKey(this, Qt::Key_Z), new KeyboardKey(this, Qt::Key_X),
       new KeyboardKey(this, Qt::Key_C), new KeyboardKey(this, Qt::Key_V),
       new KeyboardKey(this, Qt::Key_B), new KeyboardKey(this, Qt::Key_N),
       new KeyboardKey(this, Qt::Key_M),
   };
+
+  space_row = {
+    new KeyboardKey(this, Qt::Key_Control),
+    new KeyboardKey(this, Qt::Key_Meta),
+    new KeyboardKey(this, Qt::Key_Alt),
+    new KeyboardKey(this, Qt::Key_Space),
+    new KeyboardKey(this, Qt::Key_AltGr),
+    new KeyboardKey(this, Qt::Key_Menu),
+    new KeyboardKey(this, Qt::Key_Control),
+  };
+
+
 
   int col{};
 

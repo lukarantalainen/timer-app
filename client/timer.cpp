@@ -3,8 +3,11 @@
 #include <QLabel>
 #include <QTimer>
 #include <QTime>
+#include <QPushButton>
+#include <QGridLayout>
 
 Timer::Timer(QWidget* parent) : QWidget(parent) {
+  QGridLayout* layout = new QGridLayout(this);
 
   QLabel* label = new QLabel(this);
   label->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
@@ -13,6 +16,12 @@ Timer::Timer(QWidget* parent) : QWidget(parent) {
   QTimer* timer = new QTimer();
   timer->setInterval(1000);
   timer->start();
+
+  layout->addWidget(label);
+
+  QPushButton* start_button = new QPushButton("Start session", this);
+
+  layout->addWidget(start_button);
 
   connect(timer, &QTimer::timeout, this, [this, label]() {
     ++elapsed;

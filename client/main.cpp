@@ -20,11 +20,11 @@ int main(int argc, char* argv[]) {
     if (socket.waitForConnected(1000)) {
       socket.write("ACTIVATE");
       socket.waitForBytesWritten(1000);
-      qDebug() << "already active" <<  "\n";
+      qDebug() << "already active";
       return 0;
     }
 
-    qDebug() << "ghost process found" << "\n";
+    qDebug() << "ghost process found";
     shared_memory.detach();
     shared_memory.attach();
 
