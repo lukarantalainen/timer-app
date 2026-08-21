@@ -7,6 +7,7 @@ class Database {
   public:
   Database();
   ~Database();
+  void update();
 
   private:
 

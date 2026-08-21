@@ -4,6 +4,7 @@
 #include <QLocalSocket>
 #include <QLocalServer>
 
+#include "database.h"
 #include "mainwindow.h"
 
 int main(int argc, char* argv[]) {
@@ -34,6 +35,8 @@ int main(int argc, char* argv[]) {
     }
     return 0;
   }
+
+  Database database;
 
   MainWindow mainwindow;
   mainwindow.show();
