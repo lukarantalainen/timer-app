@@ -18,7 +18,7 @@
 
 volatile sig_atomic_t signaled = 0;
 
-Server::Server() {
+Server::Server(int device) {
   int ret;
   listening_socket = ::socket(AF_UNIX, SOCK_STREAM, 0);
   if (listening_socket == -1) {
@@ -54,7 +54,7 @@ Server::Server() {
   std::cout << "Server started" << "\n";
   accept(listening_socket);
 
-  m_input = new Input(6, [this](const KeyEvent& event) { onKeyEvent(event); });
+  m_input = new Input(device, [this](const KeyEvent& event) { onKeyEvent(event); });
   m_input->start();
 }
 
@@ -126,11 +126,13 @@ int Server::onKeyEvent(const KeyEvent event) {
 
 void handleSignal(int signal) { signaled = 1; }
 
-int main() {
+int main(int argc, char* argv[]) {
   std::signal(SIGPIPE, SIG_IGN);
   std::signal(SIGTERM, handleSignal);
   
-  Server server;
+  int device = argc > 1 ? argv[1][0] - '0' : 6;
+
+  Server server(device);
 
   return 0;
 }

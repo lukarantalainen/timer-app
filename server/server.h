@@ -13,6 +13,7 @@ class KeyEvent;
 class Server {
   public:
   Server();
+  Server(int device);
   ~Server();
   int onKeyEvent(const KeyEvent event);
   void accept(int socket);
