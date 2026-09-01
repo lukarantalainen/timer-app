@@ -11,6 +11,7 @@ class KeyboardKey : public QWidget {
  public:
   KeyboardKey(QWidget* parent, Qt::Key key);
 
+  void setValue(int new_value);
   void keyDown();
   void keyUp();
   void setStyle(const QString& style);

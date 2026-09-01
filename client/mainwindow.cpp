@@ -20,24 +20,33 @@
 #include "logdisplay.h"
 #include "statusbar.h"
 #include "timer.h"
+#include "database.h"
+#include "menubar.h"
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), database(new Database) {
   setWindowTitle("Activity tracker");
   setMinimumSize(100, 100);
   resize(600, 500);
 
-  m_system_tray_icon = createSystemTrayIcon();
+  system_tray_icon = createSystemTrayIcon();
 
-  m_timer = new Timer(this);
+  timer = new Timer(this);
 
-  m_status_bar = new StatusBar(this);
-  setStatusBar(m_status_bar);
+  status_bar = new StatusBar(this);
+  setStatusBar(status_bar);
 
-  m_log = new LogDisplay(this);
-  m_keyboard = new Keyboard(m_status_bar, m_log, this);
+  log_display = new LogDisplay(this);
+  keyboard = new Keyboard(status_bar, log_display, this, database);
 
-  m_central_widget = createCentralWidget();
-  setCentralWidget(m_central_widget);
+  MenuBar* menubar = new MenuBar(keyboard, this);
+  setMenuBar(menubar);
+
+  central_widget = createCentralWidget();
+  setCentralWidget(central_widget);
+}
+
+MainWindow::~MainWindow() {
+  delete database;
 }
 
 QSystemTrayIcon* MainWindow::createSystemTrayIcon() {
@@ -66,7 +75,7 @@ QSystemTrayIcon* MainWindow::createSystemTrayIcon() {
   return tray_icon;
 }
 
-void MainWindow::print(const QString text) { m_log->print(text); }
+void MainWindow::print(const QString text) { log_display->print(text); }
 
 QWidget* MainWindow::createCentralWidget() {
   auto central_widget = new QWidget(this);
@@ -76,9 +85,9 @@ QWidget* MainWindow::createCentralWidget() {
   auto layout = new QGridLayout(central_widget);
   layout->addWidget(tabwidget);
 
-  tabwidget->addTab(m_keyboard, "Keyboard");
-  tabwidget->addTab(m_timer, "Timer");
-  tabwidget->addTab(m_log, "Log");
+  tabwidget->addTab(keyboard, "Keyboard");
+  tabwidget->addTab(timer, "Timer");
+  tabwidget->addTab(log_display, "Log");
 
   return central_widget;
 }

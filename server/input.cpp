@@ -43,9 +43,9 @@ Input::Input(int device, std::function<void(const KeyEvent&)> callback)
 Input::~Input() {}
 
 int listInputs() {
-  DIR* dir = opendir("/dev/input");
+  DIR* dir = opendir("/dev/input/by-id");
   if (!dir) {
-    std::perror("Failed to open directory");
+    std::perror("failed to open directory");
     return 1;
   }
 
@@ -71,6 +71,7 @@ void Input::keyUp(KeyEvent) {}
 void Input::keyDown(KeyEvent) {}
 
 int Input::start() {
+  //listInputs();
   char* input_dev;
 
   char* path = new (char[strlen(DEV_PATH) + 1 + 1]);

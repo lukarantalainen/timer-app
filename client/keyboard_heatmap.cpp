@@ -12,6 +12,7 @@
 
 #include "keyboard_key.h"
 #include "keyevent.h"
+#include "database.h"
 
 KeyboardHeatmap::KeyboardHeatmap(KeyboardLayout layout, KeyboardSize size, QWidget* parent)
     : m_key_layout{layout}, m_size{size}, QWidget(parent) {
@@ -31,6 +32,21 @@ double getPercentage(int min, int max, int x) {
   x -= min_copy;
 
   return (double)x / max;
+}
+
+std::vector<std::pair<Qt::Key, int>> KeyboardHeatmap::getKeyData() {
+  std::vector<std::pair<Qt::Key, int>> keys; 
+  for (auto pair : m_keys) {
+    int count = (pair.second) ? pair.second->getCount() : 0;
+    keys.push_back({pair.first, count});
+  }
+  return keys;
+};
+
+void KeyboardHeatmap::setValue(Qt::Key key, int value) {
+  if (m_keys[key]) {
+    m_keys[key]->setValue(value);
+  }
 }
 
 void KeyboardHeatmap::keyDown(const KeyEvent& event) {

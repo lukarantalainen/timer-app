@@ -27,6 +27,10 @@ KeyboardKey::KeyboardKey(QWidget* parent, Qt::Key key)
   m_count_label->show();
 }
 
+void KeyboardKey::setValue(int new_value) {
+  m_count = new_value;
+}
+
 void KeyboardKey::increment() {
     ++m_count;
   }

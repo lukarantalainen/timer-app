@@ -8,21 +8,26 @@ class StatusBar;
 class Keyboard;
 class LogDisplay;
 class Timer;
+class Database;
 
 class MainWindow : public QMainWindow {
  public:
   MainWindow(QWidget* parent = nullptr);
-  virtual ~MainWindow() = default;
+  ~MainWindow();
   void print(const QString text);
+
+  
 
  private:
   QWidget* createCentralWidget();
   QSystemTrayIcon* createSystemTrayIcon();
+  
+  Database* database;
 
-  QSystemTrayIcon* m_system_tray_icon = nullptr;
-  QWidget* m_central_widget = nullptr;
-  StatusBar* m_status_bar = nullptr;
-  LogDisplay* m_log = nullptr;
-  Keyboard* m_keyboard = nullptr;
-  Timer* m_timer = nullptr;
+  QSystemTrayIcon* system_tray_icon = nullptr;
+  QWidget* central_widget = nullptr;
+  StatusBar* status_bar = nullptr;
+  LogDisplay* log_display = nullptr;
+  Keyboard* keyboard = nullptr;
+  Timer* timer = nullptr;
 };

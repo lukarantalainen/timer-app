@@ -7,9 +7,12 @@
 
 #include <list>
 #include <map>
+#include <vector>
 
 #include "keyboard_key.h"
 #include "keyevent.h"
+
+class Database;
 
 enum class KeyboardLayout {
   QWERTY,
@@ -36,6 +39,8 @@ class KeyboardHeatmap : public QWidget {
   Q_OBJECT
  public:
   KeyboardHeatmap(KeyboardLayout layout, KeyboardSize size, QWidget* parent = nullptr);
+  std::vector<std::pair<Qt::Key, int>> getKeyData();
+  void setValue(Qt::Key key, int value);
 
  private:
   QBoxLayout* m_layout;

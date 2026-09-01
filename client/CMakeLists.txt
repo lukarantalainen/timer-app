@@ -11,6 +11,7 @@ qt_add_executable(client
   statusbar.cpp
   keyboard.cpp
   database.cpp
+  menubar.cpp
   application.qrc
 )
 
