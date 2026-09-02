@@ -20,7 +20,7 @@ KeyboardHeatmap::KeyboardHeatmap(KeyboardLayout layout, KeyboardSize size, QWidg
 
   setAutoFillBackground(true);
   QPalette pal = this->palette();
-  pal.setColor(QPalette::Window, Qt::gray);
+  //pal.setColor(QPalette::Window, Qt::gray);
   this->setPalette(pal);
   createKeys();
 }
@@ -63,8 +63,6 @@ void KeyboardHeatmap::keyDown(const KeyEvent& event) {
     } else if (count > max_value) {
       max_value = count;
     }
-
-    key_object->setStyle("color: red;");
 
     double percentage = getPercentage(min_value, max_value, count);
 

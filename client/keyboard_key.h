@@ -11,11 +11,10 @@ class KeyboardKey : public QWidget {
  public:
   KeyboardKey(QWidget* parent, Qt::Key key);
 
-  void setValue(int new_value);
   void keyDown();
   void keyUp();
-  void setStyle(const QString& style);
   void updateColor(double p);
+  void setValue(int new_value);
   int getCount() { return m_count; };
 
   Qt::Key m_key;
@@ -24,6 +23,7 @@ class KeyboardKey : public QWidget {
   int m_count{};
   QLabel* m_label;
   QPalette m_label_palette;
+  QPalette pal;
 
   QLabel* m_count_label;
 

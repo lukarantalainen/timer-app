@@ -6,37 +6,52 @@
 #include <QString>
 #include <QTimer>
 #include <QPalette>
+#include <QGridLayout>
 
 KeyboardKey::KeyboardKey(QWidget* parent, Qt::Key key)
     : m_key{key}, QWidget(parent) {
   setFixedSize(50, 50);
 
+  setStyleSheet("background-color: #47db34; border-radius: 5px;");
+
+  pal = palette();
+
+  QGridLayout* layout = new QGridLayout(this);
+
+  layout->setContentsMargins(4, 4, 4, 4); 
+  layout->setSpacing(0);
+
+  layout->setRowStretch(0, 1);
+  layout->setRowStretch(2, 1);
+  layout->setColumnStretch(0, 1);
+  layout->setColumnStretch(2, 1);
+
   m_label = new QLabel(QtKeyToChar(m_key), this);
-  m_label->setAlignment(Qt::AlignCenter);
-  m_label->setFixedSize(50, 50);
-  m_label->show();
+  m_label->adjustSize();
+  
+  layout->addWidget(m_label, 1, 1, Qt::AlignCenter);
 
   m_label_palette = m_label->palette();
-  m_label_palette.setColor(QPalette::Window, Qt::darkGray);
   m_label->setAutoFillBackground(true);
   m_label->setPalette(m_label_palette);
 
   m_count_label = new QLabel(QString::number(0), this);
-  m_count_label->setAlignment(Qt::AlignBottom);
-  m_count_label->setFixedWidth(50);
-  m_count_label->show();
+  m_count_label->move(2, -8);
+  m_count_label->setStyleSheet("background: transparent; color: black;"); 
+
+  QFont font = m_count_label->font();
+  font.setPointSize(8);
+  m_count_label->setFont(font);
 }
 
 void KeyboardKey::setValue(int new_value) {
   m_count = new_value;
+  m_count_label->setText(QString::number(m_count));
 }
+
 
 void KeyboardKey::increment() {
     ++m_count;
-  }
-
-void KeyboardKey::setStyle(const QString& style) {
-  //m_label->setStyleSheet(style);
 }
 
 void KeyboardKey::keyDown() {
@@ -95,6 +110,8 @@ void KeyboardKey::updateColor(double p) {
     color = color_c * (p - 0.5) * 2.0 + color_b * (1.0 - p) * 2.0;
   }
 
-  m_label_palette.setColor(QPalette::Window, color);
-  m_label->setPalette(m_label_palette);
+  pal.setColor(QPalette::Window, color);
+  auto style_sheet = QString("border-radius: 5px; background-color: %1;")
+  .arg(color.name(QColor::HexArgb));
+  setStyleSheet(style_sheet);
 }

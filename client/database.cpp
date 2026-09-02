@@ -115,16 +115,25 @@ std::vector<std::pair<Qt::Key, int>> Database::loadKeyboard(std::string date) {
 
   rc = sqlite3_bind_text(stmt, 1, date.c_str(), date.size(), nullptr);
 
+  std::vector<std::pair<Qt::Key, int>> keys;
   while (sqlite3_step(stmt) == SQLITE_ROW) {
-    const unsigned char* key = sqlite3_column_text(stmt, 0);
+
+    std::string key_name(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)));
     int count = sqlite3_column_int(stmt, 2);
 
-    std::string key_name(reinterpret_cast<const char*>(key));
 
-    qDebug() << key_name << count;
+    QKeySequence seq(QString::fromStdString(key_name));
+
+    Qt::Key key = Qt::Key_unknown;
+    if (!seq.isEmpty()) {
+      int combinedKey = seq[0].toCombined(); 
+      key = static_cast<Qt::Key>(combinedKey & ~Qt::KeyboardModifierMask);
+    }
+    keys.push_back({key, count});
+    qDebug() << key << count;
   }
 
   rc = sqlite3_finalize(stmt);
 
-  return {};
+  return keys;
 }
