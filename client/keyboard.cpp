@@ -31,6 +31,7 @@ Keyboard::Keyboard(StatusBar* status_bar, LogDisplay* log, QWidget* parent, Data
   }
   
   m_client->start();
+  load();
 }
 
 Keyboard::~Keyboard() {

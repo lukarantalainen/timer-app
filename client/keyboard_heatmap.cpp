@@ -44,8 +44,21 @@ std::vector<std::pair<Qt::Key, int>> KeyboardHeatmap::getKeyData() {
 };
 
 void KeyboardHeatmap::setValue(Qt::Key key, int value) {
-  if (m_keys[key]) {
-    m_keys[key]->setValue(value);
+  KeyboardKey* key_object = m_keys[key];
+  if (key_object) {
+    key_object->setValue(value);
+
+    int count{key_object->getCount()};
+
+    if (count < min_value) {
+      min_value = count;
+    } else if (count > max_value) {
+      max_value = count;
+    }
+
+    double percentage = getPercentage(min_value, max_value, count);
+
+    key_object->updateColor(percentage);
   }
 }
 

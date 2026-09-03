@@ -28,8 +28,6 @@ Database::Database() {
     qDebug() << "SQL Error exec:" << sqlite3_errmsg(db);
     sqlite3_free(error);
   }
-
-  update("Key_A", "2026-08-29", 27);
 }
 
 Database::~Database() {
@@ -67,7 +65,7 @@ void Database::update(std::string key_name, std::string date, int count) {
   int rc = sqlite3_prepare_v2(db,
                               "INSERT INTO keyboard (key_name, date, count) "
                               "VALUES (?, ?, ?) ON CONFLICT (key_name, date) "
-                              "DO UPDATE SET count = count + excluded.count",
+                              "DO UPDATE SET count = MAX(count, excluded.count);",
                               -1, &stmt, nullptr);
 
   if (rc != SQLITE_OK) {
@@ -101,7 +99,7 @@ void Database::saveKeyboard(std::vector<std::pair<Qt::Key, int>> keys, std::stri
   for (auto key : keys) {
     std::string key_name = QKeySequence(key.first).toString().toStdString();
     qDebug() << key_name << date << key.second;
-    update(key_name, date, key.second);
+    this->update(key_name, date, key.second);
   }
 }
 
