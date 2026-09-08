@@ -16,6 +16,7 @@ class Database {
   void update(std::string key, std::string date, int count);
   void read();
   void saveKeyboard(std::vector<std::pair<Qt::Key, int>> keys, std::string date);
+  void resetKeyboard(std::string date);
   std::vector<std::pair<Qt::Key, int>> loadKeyboard(std::string date);
 
   private:

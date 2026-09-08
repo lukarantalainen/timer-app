@@ -19,6 +19,12 @@ class KeyboardKey : public QWidget {
 
   Qt::Key m_key;
 
+ protected:
+//   void dragEnterEvent(QDragEnterEvent* event) override;
+//   void dragMoveEvent(QDragMoveEvent* event) override;
+//   void dropEvent(QDropEvent* event) override;
+  void mousePressEvent(QMouseEvent* event) override;
+
  private:
   int m_count{};
   QLabel* m_label;

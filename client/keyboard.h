@@ -16,12 +16,12 @@ class Keyboard : public QWidget {
 
   void save();
   void load();
+  void resetDatabase();
 
   private:
   Database* database = nullptr;
-
-  KeyboardHeatmap* m_heatmap = nullptr;
-  LogDisplay* m_log = nullptr;
-  StatusBar* m_status_bar = nullptr;
-  Client* m_client = nullptr;
+  KeyboardHeatmap* heatmap = nullptr;
+  LogDisplay* log = nullptr;
+  StatusBar* status_bar = nullptr;
+  Client* client = nullptr;
 };

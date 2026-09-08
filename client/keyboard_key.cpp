@@ -8,6 +8,9 @@
 #include <QPalette>
 #include <QGridLayout>
 
+#include <QMimeData>
+#include <QDrag>
+
 KeyboardKey::KeyboardKey(QWidget* parent, Qt::Key key)
     : m_key{key}, QWidget(parent) {
   setFixedSize(50, 50);
@@ -114,4 +117,25 @@ void KeyboardKey::updateColor(double p) {
   auto style_sheet = QString("border-radius: 5px; background-color: %1;")
   .arg(color.name(QColor::HexArgb));
   setStyleSheet(style_sheet);
+}
+
+void KeyboardKey::mousePressEvent(QMouseEvent* event) {
+  KeyboardKey* object = static_cast<KeyboardKey*>(childAt(event->position().toPoint()));
+  if (!object) return;
+
+  QPixmap pixmap = object->grab();
+
+
+  QByteArray item_data;
+  QDataStream dataStream(&item_data, QIODevice::WriteOnly);
+  dataStream << pixmap << QPoint(event->position().toPoint() - object->pos());
+
+
+  QMimeData *mimeData = new QMimeData;
+  mimeData->setData("application/x-dnditemdata", item_data);
+
+  QDrag *drag = new QDrag(this);
+  drag->setMimeData(mimeData);
+  drag->setPixmap(pixmap);
+  drag->setHotSpot(event->position().toPoint() - object->pos());
 }

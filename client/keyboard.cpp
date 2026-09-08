@@ -8,36 +8,36 @@
 #include "statusbar.h"
 #include "database.h"
 
-Keyboard::Keyboard(StatusBar* status_bar, LogDisplay* log, QWidget* parent, Database* database) : m_status_bar{status_bar}, m_log{log}, QWidget(parent), database(database) {
-  m_client = new Client();
+Keyboard::Keyboard(StatusBar* status_bar, LogDisplay* log, QWidget* parent, Database* database) : status_bar{status_bar}, log{log}, QWidget(parent), database(database) {
+  client = new Client();
 
-  m_heatmap = new KeyboardHeatmap(KeyboardLayout::QWERTY,
+  heatmap = new KeyboardHeatmap(KeyboardLayout::QWERTY,
                                   KeyboardSize::SizeTKL80, this);
 
-  QObject::connect(m_client, &Client::keyDown, m_heatmap,
+  QObject::connect(client, &Client::keyDown, heatmap,
                    &KeyboardHeatmap::keyDown);
-  QObject::connect(m_client, &Client::keyUp, m_heatmap,
+  QObject::connect(client, &Client::keyUp, heatmap,
                    &KeyboardHeatmap::keyUp);
 
-  if (m_log) {
-    QObject::connect(m_client, &Client::keyDown, m_log, &LogDisplay::append);
-    QObject::connect(m_client, &Client::keyUp, m_log, &LogDisplay::append);
+  if (log) {
+    QObject::connect(client, &Client::keyDown, log, &LogDisplay::append);
+    QObject::connect(client, &Client::keyUp, log, &LogDisplay::append);
   }
   
-  if (m_status_bar) {
-    QObject::connect(m_client, &Client::connectionChanged, m_status_bar,
+  if (status_bar) {
+    QObject::connect(client, &Client::connectionChanged, status_bar,
                    &StatusBar::connectionChanged);
-    QObject::connect(m_client, &Client::connectionCountdown, m_status_bar, &StatusBar::connectionCountdown);
+    QObject::connect(client, &Client::connectionCountdown, status_bar, &StatusBar::connectionCountdown);
   }
   
-  m_client->start();
+  client->start();
   load();
 }
 
 Keyboard::~Keyboard() {
-  m_client->stop();
-  delete m_client;
-  delete m_heatmap;
+  client->stop();
+  delete client;
+  delete heatmap;
 }
 
 std::string getDate() {
@@ -55,9 +55,9 @@ std::string getDate() {
 }
 
 void Keyboard::save() {
-  if (database && m_heatmap) {
-    database->saveKeyboard(m_heatmap->getKeyData(), getDate());
-    m_log->print("Saved to database");
+  if (database && heatmap) {
+    database->saveKeyboard(heatmap->getKeyData(), getDate());
+    log->print("Saved to database");
   }
 }
 
@@ -65,6 +65,12 @@ void Keyboard::load() {
   auto data = database->loadKeyboard(getDate());
 
   for (auto p : data) {
-    m_heatmap->setValue(p.first, p.second);
+    heatmap->setValue(p.first, p.second);
   }
+}
+
+void Keyboard::resetDatabase() {
+  database->resetKeyboard(getDate());
+  
+  load();
 }

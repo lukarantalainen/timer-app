@@ -135,3 +135,17 @@ std::vector<std::pair<Qt::Key, int>> Database::loadKeyboard(std::string date) {
 
   return keys;
 }
+
+void Database::resetKeyboard(std::string date) {
+  sqlite3_stmt* stmt;
+  int rc = sqlite3_prepare_v2(db, "UPDATE keyboard SET count = 0 WHERE date = ?", -1, &stmt, nullptr);
+
+  if (rc != SQLITE_OK) {
+    qDebug() << "SQL prepare:" << sqlite3_errmsg(db);
+  }
+
+  rc = sqlite3_bind_text(stmt, 1, date.c_str(), date.size(), nullptr);
+  while (sqlite3_step(stmt) == SQLITE_ROW);
+
+  sqlite3_finalize(stmt);
+}

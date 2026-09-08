@@ -14,6 +14,8 @@ MenuBar::MenuBar(Keyboard* keyboard, QWidget* parent) : keyboard{keyboard}, QMen
   QAction* save_action = new QAction("Save", menu);
 
   QAction* load_action = new QAction("Load", menu);
+
+  QAction* reset_action = new QAction("Reset", menu);
   
   if (keyboard) {
     QObject::connect(save_action, &QAction::triggered, keyboard, &Keyboard::save);
@@ -22,8 +24,11 @@ MenuBar::MenuBar(Keyboard* keyboard, QWidget* parent) : keyboard{keyboard}, QMen
     qDebug() << "nullptr";
   }
 
+  QObject::connect(reset_action, &QAction::triggered, keyboard, &Keyboard::resetDatabase);
+
   menu->addAction(save_action);
   menu->addAction(load_action);
+  menu->addAction(reset_action);
   
   addMenu(menu);
 }
