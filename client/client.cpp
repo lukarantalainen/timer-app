@@ -45,7 +45,10 @@ void Client::initiate() {
 }
 
 int Client::connect() {
-  ::close(data_socket);
+  if (data_socket != -1) {
+    ::close(data_socket);
+    data_socket = -1;
+  } 
 
   data_socket = socket(AF_UNIX, SOCK_STREAM, 0);
   if (data_socket == -1) {
