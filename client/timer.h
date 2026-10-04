@@ -11,6 +11,12 @@ class QString;
 class QVBoxLayout;
 
 class Session;
+
+struct Activity {
+  QString name;
+  int duration;
+};
+
 class Timer : public QWidget {
   public:
   Timer(QWidget* parent);
@@ -23,12 +29,12 @@ class Timer : public QWidget {
   int elapsed{};
   bool creating = false;
 
+  std::vector<Activity> activities;
+
   QLineEdit* line_edit = nullptr;
   QPushButton* start_button = nullptr;
-  QGridLayout* layout = nullptr;
   QVBoxLayout* timer_layout = nullptr;
 
-  QWidget* activity_list = nullptr;
   QVBoxLayout* activity_layout = nullptr;
 };
 
@@ -37,8 +43,10 @@ class Session : public QWidget {
   Session(QString text, Timer* parent);
 
   void playPause();
+  int getElapsed();
   QString getName();
   QString getText();
+  void update();
   
   private:
   int session_elapsed{};

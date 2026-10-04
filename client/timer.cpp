@@ -1,17 +1,24 @@
 #include "timer.h"
 
-#include <QLabel>
-#include <QTimer>
-#include <QTime>
-#include <QPushButton>
 #include <QGridLayout>
-#include <QLineEdit>
 #include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QScrollArea>
+#include <QTime>
+#include <QTimer>
 #include <QVBoxLayout>
 #include <QWidget>
-#include <QScrollArea>
 
-Timer::Timer(QWidget* parent) : QWidget(parent), layout(new QGridLayout(this)), timer_layout(new QVBoxLayout()) {
+Timer::Timer(QWidget* parent)
+    : QWidget(parent),
+      timer_layout(new QVBoxLayout()) {
+  QLabel* session_label = new QLabel("Sessions");
+  QLabel* finished_label = new QLabel("Finished activities");
+
+  
+
   line_edit = new QLineEdit(this);
   line_edit->setPlaceholderText("Session name");
   line_edit->hide();
@@ -24,28 +31,34 @@ Timer::Timer(QWidget* parent) : QWidget(parent), layout(new QGridLayout(this)), 
     } else {
       createSession(line_edit->text());
       creating = false;
-    } 
+    }
   });
 
-  layout->addLayout(timer_layout, 0, 0, Qt::AlignTop);
-  layout->addWidget(line_edit, 2, 1, Qt::AlignLeft);
-  layout->addWidget(start_button, 2, 0, Qt::AlignBottom);
-
   auto scroll = new QScrollArea(this);
-  scroll->setMinimumHeight(300);
-  scroll->setMaximumWidth(300);
   scroll->setWidgetResizable(true);
-  
-  activity_list = new QWidget(this);
+
+  QWidget* activity_list = new QWidget(this);
   activity_list->setWindowTitle("Completed activities");
   activity_layout = new QVBoxLayout(activity_list);
+  activity_layout->addStretch();
   activity_list->setLayout(activity_layout);
-
   scroll->setWidget(activity_list);
 
-  layout->addWidget(scroll, 0, 1, Qt::AlignTop);
+  QWidget* timer = new QWidget(this);
+  timer->setLayout(timer_layout);
 
-  createSession("test");
+  auto* layout = new QGridLayout(this);
+
+  layout->addWidget(session_label, 0, 0, Qt::AlignTop);
+  layout->setColumnStretch(0, 1);
+  layout->addWidget(finished_label, 0, 1, Qt::AlignTop);
+  layout->setColumnStretch(1, 1);
+
+  layout->addWidget(timer, 1, 0, Qt::AlignTop);
+  layout->addWidget(scroll, 1, 1);
+
+  layout->addWidget(start_button, 2, 0, Qt::AlignLeft);
+  layout->addWidget(line_edit, 2, 0, Qt::AlignRight);
 }
 
 void Timer::startSession() {
@@ -61,34 +74,38 @@ void Timer::createSession(QString text) {
 
   Session* session = new Session(text, this);
 
-  timer_layout->addWidget(session);
+  timer_layout->addWidget(session, Qt::AlignTop);
 }
 
 void Timer::finishSession(Session* session) {
   QLabel* label = new QLabel(session->getText());
-  activity_layout->addWidget(label);
+  activity_layout->addWidget(label, Qt::AlignTop);
   timer_layout->removeWidget(session);
+  activities.push_back(Activity{session->getName(), session->getElapsed()});
   delete session;
 }
 
-Session::Session(QString text, Timer* parent) : session_name{text}, timer(new QTimer(this)), label(new QLabel(this)) {
+void Session::update() {
+  label->setText(
+      session_name + "\n" +
+      QTime(0, 0, 0, 0).addSecs(session_elapsed).toString("hh:mm:ss"));
+  label->adjustSize();
+}
 
+Session::Session(QString text, Timer* parent)
+    : session_name{text}, timer(new QTimer(this)), label(new QLabel(this)) {
   QHBoxLayout* layout = new QHBoxLayout(this);
 
   label->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
-  label->setText(session_name + " " + QTime(0,0,0,0).addSecs(session_elapsed).toString("hh:mm:ss"));
-  label->adjustSize();
 
   timer->setInterval(1000);
-  
-  
+
   finish_button = new QPushButton("Finish", this);
 
   pause_button = new QPushButton("Stop", this);
 
-  connect(finish_button, &QPushButton::clicked, parent, [this, parent](){
-    parent->finishSession(this);
-  });
+  connect(finish_button, &QPushButton::clicked, parent,
+          [this, parent]() { parent->finishSession(this); });
   connect(pause_button, &QPushButton::clicked, this, &Session::playPause);
 
   layout->addWidget(label);
@@ -97,19 +114,20 @@ Session::Session(QString text, Timer* parent) : session_name{text}, timer(new QT
 
   connect(timer, &QTimer::timeout, this, [this]() {
     ++session_elapsed;
-    label->setText(session_name + " " + QTime(0,0,0,0).addSecs(session_elapsed).toString("hh:mm:ss"));
-    label->adjustSize();
+    update();
   });
 
+  update();
   playPause();
 }
 
-QString Session::getName() {
-  return session_name;
-}
+int Session::getElapsed() { return session_elapsed; }
+
+QString Session::getName() { return session_name; }
 
 QString Session::getText() {
-  return session_name + " " + QTime(0,0,0,0).addSecs(session_elapsed).toString("hh:mm:ss");
+  return session_name + " " +
+         QTime(0, 0, 0, 0).addSecs(session_elapsed).toString("hh:mm:ss");
 }
 
 void Session::playPause() {

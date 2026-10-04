@@ -10,3 +10,7 @@ target_include_directories(server PRIVATE
   ${CMAKE_SOURCE_DIR}/include
 )
 
+install(PROGRAMS "$<TARGET_FILE:server>"
+  DESTINATION sbin
+  RENAME activity-tracker-daemon
+)

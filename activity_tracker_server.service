@@ -1,0 +1,10 @@
+[Unit]
+Description=background service for activity tracker
+
+[Service]
+ExecStart=/usr/sbin/activity-tracker-daemon
+
+[Install]
+WantedBy=multi-user.target
+
+
