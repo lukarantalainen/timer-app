@@ -18,10 +18,11 @@ class Input {
   void keyDown(const KeyEvent);
   void keyUp(const KeyEvent);
   int start();
+  
 
  private:
-  int m_device = -1;
-  std::function<void(const KeyEvent&)> m_callback = nullptr;
+  int device = -1;
+  std::function<void(const KeyEvent&)> callback = nullptr;
 };
 
-int listInputs();
+

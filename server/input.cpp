@@ -1,6 +1,5 @@
 #include "input.h"
 
-#include <dirent.h>
 #include <fcntl.h>
 #include <linux/input-event-codes.h>
 #include <linux/input.h>
@@ -27,7 +26,7 @@
 
 #include "table.h"
 
-constexpr char DEV_PATH[] = "/dev/input/event";
+volatile sig_atomic_t signaled = 0;
 
 const char* codename(unsigned int type, unsigned int code) {
   return (type <= EV_MAX && code <= max_size[type] && types[type] &&
@@ -36,56 +35,30 @@ const char* codename(unsigned int type, unsigned int code) {
              : "?";
 }
 
+void handleSignal(int signal) { signaled = 1; }
+
 Input::Input(int device, std::function<void(const KeyEvent&)> callback)
-    : m_device{device}, m_callback{callback} {
+    : device{device}, callback{callback} {
+    std::signal(SIGTERM, handleSignal);
 }
 
 Input::~Input() {}
 
-int listInputs() {
-  DIR* dir = opendir("/dev/input/by-id");
-  if (!dir) {
-    std::perror("failed to open directory");
-    return 1;
-  }
-
-  struct dirent* entry = readdir(dir);
-
-  std::vector<std::string> paths;
-  while (entry != nullptr) {
-    std::string name(entry->d_name);
-    if (name.find("event") != std::string::npos) {
-      std::string path = "/dev/input/" + name;
-      paths.push_back(path);
-    }
-    entry = readdir(dir);
-  }
-
-  for (auto path : paths) std::cout << path << "\n";
-
-  closedir(dir);
-  return 0;
-}
 
 void Input::keyUp(KeyEvent) {}
 void Input::keyDown(KeyEvent) {}
 
 int Input::start() {
-  //listInputs();
   char* input_dev;
 
-  char* path = new (char[strlen(DEV_PATH) + 1 + 1]);
+  std::string path{"/dev/input/event"};
 
-  std::strcpy(path, DEV_PATH);
-  if (m_device) {
-    path[std::strlen(DEV_PATH)] = m_device + '0';
-  } else {
-    std::strcat(path, "0");
-  }
+  path += (device + '0');
 
   struct pollfd fd;
 
-  fd.fd = open(path, O_RDONLY | O_NOCTTY | O_NONBLOCK);
+  fd.fd = open(path.c_str(), O_RDONLY | O_NOCTTY | O_NONBLOCK);
+  std::cerr << "Path: " << path << "\n";
 
   if (fd.fd < 0) {
     std::perror("failed to open device");
@@ -101,7 +74,9 @@ int Input::start() {
   int ret;
 
   while (true) {
-    ret = poll(&fd, 1, -1);
+    if (signaled) break;
+
+    ret = poll(&fd, 1, 100);
 
     if (ret < 0) {
       std::cout << "Failed poll" << "\n";
@@ -129,13 +104,12 @@ int Input::start() {
       const char* n = codename(type, code);
 
       const KeyEvent event{*input_data, key};
-      m_callback(event);
+      callback(event);
     }
   }
 
   ::close(fd.fd);
 
-  delete path;
   delete input_data;
 
   return 0;

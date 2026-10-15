@@ -1,14 +1,15 @@
 #include "server.h"
 
+#include <stdio.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/un.h>
 #include <unistd.h>
 
+#include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <csignal>
 #include <iostream>
 #include <print>
 
@@ -16,9 +17,15 @@
 #include "input.h"
 #include "keyevent.h"
 
-volatile sig_atomic_t signaled = 0;
+Server::Server() {
+  listInputs();
+  int device{};
+  std::cout << "Input a device number: ";
+  std::cin >> device;
 
-Server::Server(int device) {
+  input =
+      new Input(device, [this](const KeyEvent& event) { onKeyEvent(event); });
+
   int ret;
   listening_socket = ::socket(AF_UNIX, SOCK_STREAM, 0);
   if (listening_socket == -1) {
@@ -29,7 +36,8 @@ Server::Server(int device) {
   std::memset(&addr, 0, sizeof(addr));
 
   addr.sun_family = AF_UNIX;
-  int n = std::snprintf(addr.sun_path, sizeof(addr.sun_path), "%s", SOCKET_NAME);
+  int n =
+      std::snprintf(addr.sun_path, sizeof(addr.sun_path), "%s", SOCKET_NAME);
 
   if (n < 0 || static_cast<size_t>(n) >= sizeof(addr.sun_path)) {
     std::cout << "Path too long" << "\n";
@@ -37,14 +45,15 @@ Server::Server(int device) {
   }
 
   ::unlink(SOCKET_NAME);
-  ret = ::bind(listening_socket, reinterpret_cast<const sockaddr*>(&addr), sizeof(addr));
+  ret = ::bind(listening_socket, reinterpret_cast<const sockaddr*>(&addr),
+               sizeof(addr));
 
   if (ret == -1) {
     std::perror("bind");
     exit(1);
   }
   ::chmod(SOCKET_NAME, 0666);
-  
+
   ret = ::listen(listening_socket, 20);
   if (ret == -1) {
     std::perror("listen");
@@ -54,15 +63,28 @@ Server::Server(int device) {
   std::cout << "Server started" << "\n";
   accept(listening_socket);
 
-  m_input = new Input(device, [this](const KeyEvent& event) { onKeyEvent(event); });
-  m_input->start();
+  input->start();
 }
 
 Server::~Server() {
-  delete m_input;
+  delete input;
   ::close(listening_socket);
   ::close(data_socket);
   ::unlink(SOCKET_NAME);
+}
+
+int listInputs() {
+  FILE* fp;
+  char buffer[BUFFER_SIZE];
+
+  fp = popen("cat /proc/bus/input/devices  | grep -P '^[NH]: ' | paste - -",
+             "r");
+  if (fp != NULL) {
+    while (fgets(buffer, BUFFER_SIZE, fp) != NULL) printf("%s", buffer);
+    pclose(fp);
+  }
+
+  return 0;
 }
 
 void Server::accept(int socket) {
@@ -98,7 +120,8 @@ int Server::send_all(const void* data, const size_t size) {
 SerializedKeyEvent serialize(const KeyEvent& event) {
   SerializedKeyEvent s;
   s.input_data = event.input_data;
-  int n = std::snprintf(s.key_name, sizeof(s.key_name), "%s", event.key_name.c_str());
+  int n = std::snprintf(s.key_name, sizeof(s.key_name), "%s",
+                        event.key_name.c_str());
   return s;
 }
 
@@ -124,15 +147,10 @@ int Server::onKeyEvent(const KeyEvent event) {
   return 0;
 }
 
-void handleSignal(int signal) { signaled = 1; }
-
 int main(int argc, char* argv[]) {
   std::signal(SIGPIPE, SIG_IGN);
-  std::signal(SIGTERM, handleSignal);
-  
-  int device = argc > 1 ? argv[1][0] - '0' : 6;
 
-  Server server(device);
+  Server* server = new Server();
 
   return 0;
 }

@@ -13,11 +13,12 @@ class KeyEvent;
 class Server {
   public:
   Server();
-  Server(int device);
   ~Server();
   int onKeyEvent(const KeyEvent event);
   void accept(int socket);
   int send_all(const void* data, const size_t size);
+
+  
 
   private:
   int listening_socket = -1;
@@ -25,5 +26,7 @@ class Server {
   sockaddr_un addr;
   bool connected = false;
 
-  Input* m_input = nullptr;
+  Input* input = nullptr;
 };
+
+int listInputs();
