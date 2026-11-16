@@ -11,7 +11,7 @@
 #include <QMimeData>
 #include <QDrag>
 
-KeyboardKey::KeyboardKey(QWidget* parent, Qt::Key key)
+KeyboardKey::KeyboardKey(QWidget* parent, Qt::Key key, QString label)
     : m_key{key}, QWidget(parent) {
   setFixedSize(50, 50);
 
@@ -29,7 +29,9 @@ KeyboardKey::KeyboardKey(QWidget* parent, Qt::Key key)
   layout->setColumnStretch(0, 1);
   layout->setColumnStretch(2, 1);
 
-  m_label = new QLabel(QtKeyToChar(m_key), this);
+  // m_label = new QLabel(QtKeyToChar(m_key), this);
+  if (label == "") label = QtKeyToChar(m_key);
+  m_label = new QLabel(label, this);
   m_label->adjustSize();
   
   layout->addWidget(m_label, 1, 1, Qt::AlignCenter);

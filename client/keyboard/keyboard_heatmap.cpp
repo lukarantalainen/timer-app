@@ -8,19 +8,20 @@
 #include <QSpacerItem>
 #include <QString>
 #include <iostream>
+#include <list>
 #include <string>
 
+#include "database.h"
 #include "keyboard_key.h"
 #include "keyevent.h"
-#include "database.h"
 
-KeyboardHeatmap::KeyboardHeatmap(KeyboardLayout layout, KeyboardSize size, QWidget* parent)
+KeyboardHeatmap::KeyboardHeatmap(KeyboardLayout layout, KeyboardSize size,
+                                 QWidget* parent)
     : m_key_layout{layout}, m_size{size}, QWidget(parent) {
   m_layout = new QBoxLayout(QBoxLayout::Direction::TopToBottom, this);
 
   setAutoFillBackground(true);
   QPalette pal = this->palette();
-  //pal.setColor(QPalette::Window, Qt::gray);
   this->setPalette(pal);
   createKeys();
 }
@@ -35,7 +36,7 @@ double getPercentage(int min, int max, int x) {
 }
 
 std::vector<std::pair<Qt::Key, int>> KeyboardHeatmap::getKeyData() {
-  std::vector<std::pair<Qt::Key, int>> keys; 
+  std::vector<std::pair<Qt::Key, int>> keys;
   for (auto pair : m_keys) {
     int count = (pair.second) ? pair.second->getCount() : 0;
     keys.push_back({pair.first, count});
@@ -94,116 +95,98 @@ void KeyboardHeatmap::keyUp(const KeyEvent& event) {
   }
 }
 
-void KeyboardHeatmap::createKeys() {
-  function_row = {
-      new KeyboardKey(this, Qt::Key_Escape),
-      new KeyboardKey(this, Qt::Key_F1),
-  new KeyboardKey(this, Qt::Key_F2),
-  new KeyboardKey(this, Qt::Key_F3),
-  new KeyboardKey(this, Qt::Key_F4),
-  new KeyboardKey(this, Qt::Key_F5),
-  new KeyboardKey(this, Qt::Key_F6),
-  new KeyboardKey(this, Qt::Key_F7),
-  new KeyboardKey(this, Qt::Key_F8),
-  new KeyboardKey(this, Qt::Key_F9),
-  new KeyboardKey(this, Qt::Key_F10),
-  new KeyboardKey(this, Qt::Key_F11),
-  new KeyboardKey(this, Qt::Key_F12),
-  };
-
-  number_row = {
-    new KeyboardKey(this, Qt::Key_AsciiTilde),
-      new KeyboardKey(this, Qt::Key_1), new KeyboardKey(this, Qt::Key_2),
-      new KeyboardKey(this, Qt::Key_3), new KeyboardKey(this, Qt::Key_4),
-      new KeyboardKey(this, Qt::Key_5), new KeyboardKey(this, Qt::Key_6),
-      new KeyboardKey(this, Qt::Key_7), new KeyboardKey(this, Qt::Key_8),
-      new KeyboardKey(this, Qt::Key_9), new KeyboardKey(this, Qt::Key_0),
-  };
-
-  top_row = {
-    new KeyboardKey(this, Qt::Key_Tab),
-      new KeyboardKey(this, Qt::Key_Q), new KeyboardKey(this, Qt::Key_W),
-      new KeyboardKey(this, Qt::Key_E), new KeyboardKey(this, Qt::Key_R),
-      new KeyboardKey(this, Qt::Key_T), new KeyboardKey(this, Qt::Key_Y),
-      new KeyboardKey(this, Qt::Key_U), new KeyboardKey(this, Qt::Key_I),
-      new KeyboardKey(this, Qt::Key_O), new KeyboardKey(this, Qt::Key_P),
-  };
-
-  home_row = {
-      new KeyboardKey(this, Qt::Key_CapsLock),
-      new KeyboardKey(this, Qt::Key_A), new KeyboardKey(this, Qt::Key_S),
-      new KeyboardKey(this, Qt::Key_D), new KeyboardKey(this, Qt::Key_F),
-      new KeyboardKey(this, Qt::Key_G), new KeyboardKey(this, Qt::Key_H),
-      new KeyboardKey(this, Qt::Key_J), new KeyboardKey(this, Qt::Key_K),
-      new KeyboardKey(this, Qt::Key_L),
-  };
-
-  bottom_row = {
-    new KeyboardKey(this, Qt::Key_Shift),
-      new KeyboardKey(this, Qt::Key_Z), new KeyboardKey(this, Qt::Key_X),
-      new KeyboardKey(this, Qt::Key_C), new KeyboardKey(this, Qt::Key_V),
-      new KeyboardKey(this, Qt::Key_B), new KeyboardKey(this, Qt::Key_N),
-      new KeyboardKey(this, Qt::Key_M),
-  };
-
-  space_row = {
-    new KeyboardKey(this, Qt::Key_Control),
-    new KeyboardKey(this, Qt::Key_Meta),
-    new KeyboardKey(this, Qt::Key_Alt),
-    new KeyboardKey(this, Qt::Key_Space),
-    new KeyboardKey(this, Qt::Key_AltGr),
-    new KeyboardKey(this, Qt::Key_Menu),
-    new KeyboardKey(this, Qt::Key_Control),
-  };
-
-
-
+QBoxLayout* KeyboardHeatmap::createLayout(std::list<KeyboardKey*> row) {
   int col{};
-
-  QBoxLayout* number_row_layout =
-      new QBoxLayout(QBoxLayout::Direction::LeftToRight);
-  number_row_layout->setSpacing(4);
-  for (auto it{number_row.begin()}; it != number_row.end(); ++it) {
+  QBoxLayout* layout = new QBoxLayout(QBoxLayout::Direction::LeftToRight);
+  layout->setSpacing(4);
+  for (auto it{row.begin()}; it != row.end(); ++it) {
     m_keys.insert({(*it)->m_key, *it});
-    number_row_layout->addWidget(*it);
+    layout->addWidget(*it);
     ++col;
   }
-  number_row_layout->addStretch();
-  m_layout->addLayout(number_row_layout);
+  layout->addStretch();
+  return layout;
+}
 
-  QBoxLayout* top_row_layout =
-      new QBoxLayout(QBoxLayout::Direction::LeftToRight);
-  top_row_layout->setSpacing(4);
-  col = 0;
-  for (auto it{top_row.begin()}; it != top_row.end(); ++it) {
-    m_keys.insert({(*it)->m_key, *it});
-    top_row_layout->addWidget(*it);
-    ++col;
-  }
-  top_row_layout->addStretch();
-  m_layout->addLayout(top_row_layout);
+void KeyboardHeatmap::createKeys() {
+  row0 = {new KeyboardKey(this, Qt::Key_F1, "F1"),
+          new KeyboardKey(this, Qt::Key_F2, "F2"),
+          new KeyboardKey(this, Qt::Key_F3, "F3"),
+          new KeyboardKey(this, Qt::Key_F4, "F4"),
+          new KeyboardKey(this, Qt::Key_F5, "F5"),
+          new KeyboardKey(this, Qt::Key_F6, "F6"),
+          new KeyboardKey(this, Qt::Key_F7, "F7"),
+          new KeyboardKey(this, Qt::Key_F8, "F8"),
+          new KeyboardKey(this, Qt::Key_F9, "F9"),
+          new KeyboardKey(this, Qt::Key_F10, "F10"),
+          new KeyboardKey(this, Qt::Key_F11, "F11"),
+          new KeyboardKey(this, Qt::Key_F12, "F12")
 
-  QBoxLayout* home_row_layout =
-      new QBoxLayout(QBoxLayout::Direction::LeftToRight);
-  home_row_layout->setSpacing(4);
-  col = 0;
-  for (auto it{home_row.begin()}; it != home_row.end(); ++it) {
-    m_keys.insert({(*it)->m_key, *it});
-    home_row_layout->addWidget(*it);
-    ++col;
-  }
-  home_row_layout->addStretch();
-  m_layout->addLayout(home_row_layout);
+  };
 
-  QBoxLayout* bottom_row_layout =
-      new QBoxLayout(QBoxLayout::Direction::LeftToRight);
-  bottom_row_layout->setSpacing(4);
-  col = 0;
-  for (auto it{bottom_row.begin()}; it != bottom_row.end(); ++it) {
-    m_keys.insert({(*it)->m_key, *it});
-    bottom_row_layout->addWidget(*it);
-    ++col;
-  }
-  bottom_row_layout->addStretch();
-  m_layout->addLayout(bottom_row_layout);
+  row1 = {
+      new KeyboardKey(this, Qt::Key_AsciiTilde),
+      new KeyboardKey(this, Qt::Key_1, "1"),
+      new KeyboardKey(this, Qt::Key_2, "2"),
+      new KeyboardKey(this, Qt::Key_3, "3"),
+      new KeyboardKey(this, Qt::Key_4, "4"),
+      new KeyboardKey(this, Qt::Key_5, "5"),
+      new KeyboardKey(this, Qt::Key_6, "6"),
+      new KeyboardKey(this, Qt::Key_7, "7"),
+      new KeyboardKey(this, Qt::Key_8, "8"),
+      new KeyboardKey(this, Qt::Key_9, "9"),
+      new KeyboardKey(this, Qt::Key_0, "0"),
+  };
+
+  row2 = {
+      new KeyboardKey(this, Qt::Key_Tab, "Tab"), new KeyboardKey(this, Qt::Key_Q, "Q"),
+      new KeyboardKey(this, Qt::Key_W, "W"),   new KeyboardKey(this, Qt::Key_E, "E"),
+      new KeyboardKey(this, Qt::Key_R, "R"),   new KeyboardKey(this, Qt::Key_T, "T"),
+      new KeyboardKey(this, Qt::Key_Y, "Y"),   new KeyboardKey(this, Qt::Key_U, "U"),
+      new KeyboardKey(this, Qt::Key_I, "I"),   new KeyboardKey(this, Qt::Key_O, "O"),
+      new KeyboardKey(this, Qt::Key_P, "P"),
+  };
+
+  row3 = {
+      new KeyboardKey(this, Qt::Key_CapsLock, "Caps"), new KeyboardKey(this, Qt::Key_A, "A"),
+      new KeyboardKey(this, Qt::Key_S, "S"),        new KeyboardKey(this, Qt::Key_D, "D"),
+      new KeyboardKey(this, Qt::Key_F, "F"),        new KeyboardKey(this, Qt::Key_G, "G"),
+      new KeyboardKey(this, Qt::Key_H, "H"),        new KeyboardKey(this, Qt::Key_J, "J"),
+      new KeyboardKey(this, Qt::Key_K, "K"),        new KeyboardKey(this, Qt::Key_L, "L"),
+  };
+
+  row4 = {
+      new KeyboardKey(this, Qt::Key_Shift, "Shift"), new KeyboardKey(this, Qt::Key_Z, "Z"),
+      new KeyboardKey(this, Qt::Key_X, "X"),     new KeyboardKey(this, Qt::Key_C, "C"),
+      new KeyboardKey(this, Qt::Key_V, "V"),     new KeyboardKey(this, Qt::Key_B, "B"),
+      new KeyboardKey(this, Qt::Key_N, "N"),     new KeyboardKey(this, Qt::Key_M, "M"),
+  };
+
+  row5 = {
+      new KeyboardKey(this, Qt::Key_Control, "Ctrl"),
+      new KeyboardKey(this, Qt::Key_Meta, "Meta"),
+      new KeyboardKey(this, Qt::Key_Alt, "Alt"),
+      new KeyboardKey(this, Qt::Key_Space, "Space"),
+      new KeyboardKey(this, Qt::Key_AltGr, "Alt"),
+      new KeyboardKey(this, Qt::Key_Menu, "Menu"),
+      new KeyboardKey(this, Qt::Key_Control, "Ctrl"),
+  };
+
+  auto row0_layout = createLayout(row0);
+  m_layout->addLayout(row0_layout);
+
+  auto row1_layout = createLayout(row1);
+  m_layout->addLayout(row1_layout);
+
+  auto row2_layout = createLayout(row2);
+  m_layout->addLayout(row2_layout);
+
+  auto row3_layout = createLayout(row3);
+  m_layout->addLayout(row3_layout);
+
+  auto row4_layout = createLayout(row4);
+  m_layout->addLayout(row4_layout);
+
+  auto row5_layout = createLayout(row5);
+  m_layout->addLayout(row5_layout);
 }

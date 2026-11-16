@@ -9,7 +9,7 @@
 
 class KeyboardKey : public QWidget {
  public:
-  KeyboardKey(QWidget* parent, Qt::Key key);
+  KeyboardKey(QWidget* parent, Qt::Key key, QString name = "");
 
   void keyDown();
   void keyUp();

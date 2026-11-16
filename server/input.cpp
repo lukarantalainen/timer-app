@@ -49,8 +49,6 @@ void Input::keyUp(KeyEvent) {}
 void Input::keyDown(KeyEvent) {}
 
 int Input::start() {
-  char* input_dev;
-
   std::string path{"/dev/input/event"};
 
   path += (device + '0');

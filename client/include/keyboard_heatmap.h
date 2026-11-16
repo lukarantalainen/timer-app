@@ -47,12 +47,12 @@ class KeyboardHeatmap : public QWidget {
   KeyboardLayout m_key_layout;
   KeyboardSize m_size;
 
-  std::list<KeyboardKey*> function_row;
-  std::list<KeyboardKey*> number_row;
-  std::list<KeyboardKey*> top_row;
-  std::list<KeyboardKey*> home_row;
-  std::list<KeyboardKey*> bottom_row;
-  std::list<KeyboardKey*> space_row;
+  std::list<KeyboardKey*> row0;
+  std::list<KeyboardKey*> row1;
+  std::list<KeyboardKey*> row2;
+  std::list<KeyboardKey*> row3;
+  std::list<KeyboardKey*> row4;
+  std::list<KeyboardKey*> row5;
   
 
   std::map<Qt::Key, KeyboardKey*> m_keys;
@@ -61,6 +61,7 @@ class KeyboardHeatmap : public QWidget {
   int max_value{};
 
   void createKeys();
+  QBoxLayout* createLayout(std::list<KeyboardKey*> row);
 
  public slots:
   void keyDown(const KeyEvent& event);

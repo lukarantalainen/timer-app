@@ -1,5 +1,3 @@
-set(CMAKE_AUTORCC ON)
-
 qt_add_executable(client
   main.cpp
   mainwindow.cpp
@@ -9,25 +7,26 @@ qt_add_executable(client
   statusbar.cpp
   database.cpp
   menubar.cpp
-  application.qrc
   keyboard/keyboard_heatmap.cpp
   keyboard/keyboard_key.cpp
   keyboard/keyboard.cpp
 
   include/client.h
-  include/database.h
-  include/keyboard.h
-  include/logdisplay.h
-  include/mainwindow.h
-  include/menubar.h
   include/statusbar.h
-  include/timer.h
+  include/logdisplay.h
+  include/keyboard_heatmap.h
+)
+
+qt_add_resources(client "images"
+    PREFIX /
+    FILES images/trayicon.png
 )
 
 add_dependencies(client generate_headers)
 
 find_package(SQLite3)
 target_link_libraries(client PRIVATE Qt6::Widgets Qt6::Network SQLite3::SQLite3)
+
 
 target_include_directories(client PRIVATE
   ${CMAKE_BINARY_DIR}/generated

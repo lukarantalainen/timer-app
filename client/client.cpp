@@ -151,6 +151,7 @@ KeyEvent deserialize(const char* buffer) {
   p += sizeof(input_event);
 
   event.key_name = std::string(p);
+  qDebug() << event.key_name;
 
   return event;
 }

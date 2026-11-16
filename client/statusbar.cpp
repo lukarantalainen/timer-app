@@ -1,6 +1,7 @@
 #include "statusbar.h"
-#include <QStatusBar>
+
 #include <QLabel>
+#include <QStatusBar>
 
 StatusBar::StatusBar(QWidget* parent) : QStatusBar(parent) {
   status_label = new QLabel();
@@ -32,4 +33,3 @@ void StatusBar::connectionChanged(bool connected) {
     status_label->setText("Disconnected");
   }
 }
-
