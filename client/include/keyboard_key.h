@@ -18,6 +18,7 @@ class KeyboardKey : public QWidget {
   int getCount() { return m_count; };
 
   Qt::Key m_key;
+  QString name;
 
  protected:
 //   void dragEnterEvent(QDragEnterEvent* event) override;

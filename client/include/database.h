@@ -13,11 +13,11 @@ class Database {
   public:
   Database();
   ~Database();
-  void update(std::string key, std::string date, int count);
+  void update(QString key_name, std::string date, int count);
   void read();
-  void saveKeyboard(std::vector<std::pair<Qt::Key, int>> keys, std::string date);
+  void saveKeyboard(std::vector<std::pair<QString, int>> keys, std::string date);
   void resetKeyboard(std::string date);
-  std::vector<std::pair<Qt::Key, int>> loadKeyboard(std::string date);
+  std::vector<std::pair<QString, int>> loadKeyboard(std::string date);
 
   private:
   

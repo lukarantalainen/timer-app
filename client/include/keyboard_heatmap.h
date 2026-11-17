@@ -39,8 +39,8 @@ class KeyboardHeatmap : public QWidget {
   Q_OBJECT
  public:
   KeyboardHeatmap(KeyboardLayout layout, KeyboardSize size, QWidget* parent = nullptr);
-  std::vector<std::pair<Qt::Key, int>> getKeyData();
-  void setValue(Qt::Key key, int value);
+  std::vector<std::pair<QString, int>> getKeyData();
+  void setValue(QString key, int value);
 
  private:
   QBoxLayout* m_layout;
@@ -55,7 +55,7 @@ class KeyboardHeatmap : public QWidget {
   std::list<KeyboardKey*> row5;
   
 
-  std::map<Qt::Key, KeyboardKey*> m_keys;
+  std::map<QString, KeyboardKey*> m_keys;
 
   int min_value{};
   int max_value{};

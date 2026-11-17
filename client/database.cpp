@@ -58,8 +58,10 @@ void Database::read() {
   }
 }
 
-void Database::update(std::string key_name, std::string date, int count) {
+void Database::update(QString key_name, std::string date, int count) {
   char* error;
+
+  std::string key_name_str = key_name.toStdString();
 
   sqlite3_stmt* stmt;
   int rc = sqlite3_prepare_v2(db,
@@ -72,7 +74,7 @@ void Database::update(std::string key_name, std::string date, int count) {
     qDebug() << "SQL prepare:" << sqlite3_errmsg(db);
   }
 
-  rc = sqlite3_bind_text(stmt, 1, key_name.c_str(), key_name.size(), nullptr);
+  rc = sqlite3_bind_text(stmt, 1, key_name_str.c_str(), key_name_str.size(), nullptr);
   if (rc != SQLITE_OK) {
     qDebug() << "SQL bind:" << sqlite3_errmsg(db);
   }
@@ -95,15 +97,15 @@ void Database::update(std::string key_name, std::string date, int count) {
   }
 }
 
-void Database::saveKeyboard(std::vector<std::pair<Qt::Key, int>> keys, std::string date) {
+void Database::saveKeyboard(std::vector<std::pair<QString, int>> keys, std::string date) {
   for (auto key : keys) {
-    std::string key_name = QKeySequence(key.first).toString().toStdString();
+    QString key_name = key.first;
     qDebug() << key_name << date << key.second;
     this->update(key_name, date, key.second);
   }
 }
 
-std::vector<std::pair<Qt::Key, int>> Database::loadKeyboard(std::string date) {
+std::vector<std::pair<QString, int>> Database::loadKeyboard(std::string date) {
   sqlite3_stmt* stmt;
   int rc = sqlite3_prepare_v2(db, "SELECT * FROM keyboard WHERE date = ?", -1, &stmt, nullptr);
 
@@ -113,22 +115,21 @@ std::vector<std::pair<Qt::Key, int>> Database::loadKeyboard(std::string date) {
 
   rc = sqlite3_bind_text(stmt, 1, date.c_str(), date.size(), nullptr);
 
-  std::vector<std::pair<Qt::Key, int>> keys;
+  std::vector<std::pair<QString, int>> keys;
   while (sqlite3_step(stmt) == SQLITE_ROW) {
 
     std::string key_name(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)));
     int count = sqlite3_column_int(stmt, 2);
 
 
-    QKeySequence seq(QString::fromStdString(key_name));
+    // QKeySequence seq(QString::fromStdString(key_name));
 
-    Qt::Key key = Qt::Key_unknown;
-    if (!seq.isEmpty()) {
-      int combinedKey = seq[0].toCombined(); 
-      key = static_cast<Qt::Key>(combinedKey & ~Qt::KeyboardModifierMask);
-    }
-    keys.push_back({key, count});
-    qDebug() << key << count;
+    // Qt::Key key = "";
+    // if (!seq.isEmpty()) {
+    //   int combinedKey = seq[0].toCombined(); 
+    //   key = static_cast<Qt::Key>(combinedKey & ~Qt::KeyboardModifierMask);
+    // }
+    keys.push_back({QString::fromStdString(key_name), count});
   }
 
   rc = sqlite3_finalize(stmt);
