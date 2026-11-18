@@ -11,8 +11,8 @@
 #include <QMimeData>
 #include <QDrag>
 
-KeyboardKey::KeyboardKey(QWidget* parent, Qt::Key key, QString name)
-    : m_key{key}, name{name}, QWidget(parent) {
+KeyboardKey::KeyboardKey(QWidget* parent, QString key_name, QString label)
+    : key_name{key_name}, label{label}, QWidget(parent) {
   setFixedSize(50, 50);
 
   setStyleSheet("background-color: #47db34; border-radius: 5px;");
@@ -29,16 +29,14 @@ KeyboardKey::KeyboardKey(QWidget* parent, Qt::Key key, QString name)
   layout->setColumnStretch(0, 1);
   layout->setColumnStretch(2, 1);
 
-  // m_label = new QLabel(QtKeyToChar(m_key), this);
-  if (name == "") name = QtKeyToChar(m_key);
-  m_label = new QLabel(name, this);
-  m_label->adjustSize();
+  key_label = new QLabel(key_name, this);
+  key_label->adjustSize();
   
-  layout->addWidget(m_label, 1, 1, Qt::AlignCenter);
+  layout->addWidget(key_label, 1, 1, Qt::AlignCenter);
 
-  m_label_palette = m_label->palette();
-  m_label->setAutoFillBackground(true);
-  m_label->setPalette(m_label_palette);
+  key_label_palette = key_label->palette();
+  key_label->setAutoFillBackground(true);
+  key_label->setPalette(key_label_palette);
 
   m_count_label = new QLabel(QString::number(0), this);
   m_count_label->move(2, -8);
@@ -63,12 +61,12 @@ void KeyboardKey::keyDown() {
   increment();
   m_count_label->setText(QString::number(m_count));
 
-  m_label_palette.setColor(QPalette::WindowText, Qt::white);
+  key_label_palette.setColor(QPalette::WindowText, Qt::white);
 }
 
 void KeyboardKey::keyUp() {
-  m_label_palette.setColor(QPalette::WindowText, Qt::black);
-  m_label->setPalette(m_label_palette);
+  key_label_palette.setColor(QPalette::WindowText, Qt::black);
+  key_label->setPalette(key_label_palette);
 }
 
 QString QtKeyToChar(Qt::Key key) {

@@ -9,7 +9,7 @@
 
 class KeyboardKey : public QWidget {
  public:
-  KeyboardKey(QWidget* parent, Qt::Key key, QString name = "");
+  KeyboardKey(QWidget* parent, QString key_name, QString label = "");
 
   void keyDown();
   void keyUp();
@@ -17,8 +17,8 @@ class KeyboardKey : public QWidget {
   void setValue(int new_value);
   int getCount() { return m_count; };
 
-  Qt::Key m_key;
-  QString name;
+  const QString key_name;
+  const QString label;
 
  protected:
 //   void dragEnterEvent(QDragEnterEvent* event) override;
@@ -28,8 +28,8 @@ class KeyboardKey : public QWidget {
 
  private:
   int m_count{};
-  QLabel* m_label;
-  QPalette m_label_palette;
+  QLabel* key_label;
+  QPalette key_label_palette;
   QPalette pal;
 
   QLabel* m_count_label;
